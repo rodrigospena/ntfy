@@ -135,11 +135,16 @@
 
     function exibirNotificacao(titulo, mensagem, iconeCustomizado) {
       if (Notification.permission === "granted") {
-        const fullIconUrl = iconeCustomizado ? (iconeCustomizado.startsWith("http") ? iconeCustomizado : `${SERVIDOR}${iconeCustomizado}`) : `${SERVIDOR}/static/images/custom-logo.png`;
-        new Notification(titulo, {
+        let iconPath = iconeCustomizado || "/static/images/custom-logo.png";
+        if (!iconPath.startsWith("http")) {
+          iconPath = window.location.origin + iconPath;
+        }
+        const options = {
           body: mensagem,
-          icon: fullIconUrl
-        });
+          icon: iconPath,
+          badge: iconPath
+        };
+        new Notification(titulo, options);
       }
     }
 
