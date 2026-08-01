@@ -134,7 +134,7 @@ var (
 	apiAccountBillingSubscriptionCheckoutSuccessTemplate = "/v1/account/billing/subscription/success/{CHECKOUT_SESSION_ID}"
 	apiAccountBillingSubscriptionCheckoutSuccessRegex    = regexp.MustCompile(`/v1/account/billing/subscription/success/(.+)$`)
 	apiAccountReservationSingleRegex                     = regexp.MustCompile(`/v1/account/reservation/([-_A-Za-z0-9]{1,64})$`)
-	staticRegex                                          = regexp.MustCompile(`^/(static/.+|app.html|sw.js|sw.js.map)$`)
+	staticRegex                                          = regexp.MustCompile(`^/(static/.+|app.html|notificar.html|sw.js|sw.js.map)$`)
 	docsRegex                                            = regexp.MustCompile(`^/docs(|/.*)$`)
 	fileRegex                                            = regexp.MustCompile(`^/file/([-_A-Za-z0-9]{1,64})(?:\.[A-Za-z0-9]{1,16})?$`)
 	urlRegex                                             = regexp.MustCompile(`^https?://`)
