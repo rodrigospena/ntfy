@@ -14,6 +14,35 @@
 ![ntfy](web/public/static/images/ntfy.png)
 
 # ntfy.sh | Send push notifications to your phone or desktop via PUT/POST
+
+> [!NOTE]  
+> **Versão Modificada por [rodrigospena](https://github.com/rodrigospena)**  
+> Esta versão possui o frontend Web App (React) integrado diretamente no executável binário autônomo Go e inclui scripts rápidos para execução local no Windows sem necessidade de Node.js/Vite ou da porta 3000.
+
+## 🚀 Como Executar Localmente (Versão rodrigospena)
+
+Para rodar a aplicação localmente de forma simples no Windows:
+
+### Opção 1: Via Duplo Clique / Prompt de Comando (CMD)
+Execute o script [run.bat](file:///c:/Users/digo_/Documents/Programa%C3%A7%C3%A3o/GitHub/ntfy/run.bat):
+```cmd
+run.bat
+```
+*(Opcional: para especificar uma porta personalizada, passe o número como argumento: `run.bat 9090`)*
+
+### Opção 2: Via PowerShell
+Execute o script [run.ps1](file:///c:/Users/digo_/Documents/Programa%C3%A7%C3%A3o/GitHub/ntfy/run.ps1):
+```powershell
+.\run.ps1 -Port 8080
+```
+
+---
+
+- **Interface Web**: http://localhost:8080/app.html  
+- **API Endpoint**: http://localhost:8080/  
+
+---
+
 [![Release](https://img.shields.io/github/release/binwiederhier/ntfy.svg?color=success&style=flat-square)](https://github.com/binwiederhier/ntfy/releases/latest)
 [![Go Reference](https://pkg.go.dev/badge/heckel.io/ntfy.svg)](https://pkg.go.dev/heckel.io/ntfy/v2)
 [![Tests](https://github.com/binwiederhier/ntfy/workflows/test/badge.svg)](https://github.com/binwiederhier/ntfy/actions)

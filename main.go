@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"runtime"
+	"time"
 
 	"github.com/urfave/cli/v2"
 	"heckel.io/ntfy/v2/cmd"
@@ -35,7 +37,16 @@ Copyright (C) Philipp C. Heckel, licensed under Apache License 2.0 & GPLv2
 		cmd.MetadataKeyCommit: commit,
 	}
 
-	if err := app.Run(os.Args); err != nil {
+	args := os.Args
+	if len(args) == 1 {
+		args = append(args, "serve", "--listen-http", ":8080")
+		go func() {
+			time.Sleep(500 * time.Millisecond)
+			exec.Command("rundll32", "url.dll,FileProtocolHandler", "http://localhost:8080/app.html").Start()
+		}()
+	}
+
+	if err := app.Run(args); err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
