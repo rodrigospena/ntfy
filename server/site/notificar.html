@@ -120,7 +120,8 @@
         try {
           const data = JSON.parse(event.data);
           if (data.event === "message") {
-            exibirNotificacao(data.title || "Nova Notificação", data.message);
+            const iconUrl = data.icon || (data.attachment && data.attachment.url) || "/static/images/custom-logo.png";
+            exibirNotificacao(data.title || "Nova Notificação", data.message, iconUrl);
           }
         } catch (e) {
           console.error("Erro ao processar mensagem", e);
