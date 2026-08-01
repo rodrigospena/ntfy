@@ -69,21 +69,21 @@ sudo netfilter-persistent save
 ```
 
 ### 3. Compilar e Rodar o ntfy na VM
-No terminal do seu servidor Linux:
+No terminal do seu servidor Linux (os arquivos da interface Web já estão pré-compilados no repositório):
 
 ```bash
-# 1. Instalar dependências (Oracle Linux / RHEL)
-sudo dnf install -y git gcc go nodejs npm
+# 1. Instalar pacotes necessários (Oracle Linux / RHEL)
+sudo dnf install -y git gcc go
 
-# (Se for Ubuntu, use: sudo apt update && sudo apt install -y git gcc go nodejs npm)
+# (Se for Ubuntu, use: sudo apt update && sudo apt install -y git gcc go)
 
 # 2. Clonar o projeto
 git clone https://github.com/rodrigospena/ntfy.git
 cd ntfy
 
-# 3. Compilar o Frontend Web e mover para o servidor
-cd web && npm ci && npx vite build && cd ..
-mkdir -p server/site && cp -r web/build/* server/site/ && cp server/site/index.html server/site/app.html
+# 3. Garantir pastas estáticas
+mkdir -p server/site server/docs
+touch server/site/index.html server/docs/index.html
 
 # 4. Compilar o servidor Go com suporte a SQLite (CGO)
 CGO_ENABLED=1 go build -o ntfy main.go
