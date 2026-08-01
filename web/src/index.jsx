@@ -5,5 +5,11 @@ import registerSW from "./registerSW";
 
 registerSW();
 
+if ("Notification" in window && Notification.permission === "default") {
+  window.addEventListener("load", () => {
+    Notification.requestPermission();
+  });
+}
+
 const root = createRoot(document.querySelector("#root"));
 root.render(<App />);
