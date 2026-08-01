@@ -7,7 +7,7 @@ if not "%~1"=="" set PORT=%~1
 
 echo ========================================================
 echo Iniciando Servidor ntfy na porta %PORT%...
-echo Interface Web disponível em: http://localhost:%PORT%/app
+echo Interface Web disponível em: http://localhost:%PORT%/app.html
 echo API de Notificação em:       http://localhost:%PORT%/
 echo ========================================================
 
