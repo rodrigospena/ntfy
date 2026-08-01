@@ -135,9 +135,10 @@
 
     function exibirNotificacao(titulo, mensagem, iconeCustomizado) {
       if (Notification.permission === "granted") {
+        const fullIconUrl = iconeCustomizado ? (iconeCustomizado.startsWith("http") ? iconeCustomizado : `${SERVIDOR}${iconeCustomizado}`) : `${SERVIDOR}/static/images/custom-logo.png`;
         new Notification(titulo, {
           body: mensagem,
-          icon: iconeCustomizado || "/static/images/custom-logo.png"
+          icon: fullIconUrl
         });
       }
     }
