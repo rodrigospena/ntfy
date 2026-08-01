@@ -43,6 +43,59 @@ Execute o script [run.ps1](file:///c:/Users/digo_/Documents/Programa%C3%A7%C3%A3
 
 ---
 
+## ☁️ Como Rodar na Oracle Cloud (OCI) Gratis (Always Free)
+
+### 1. Liberar Porta no Painel da Oracle Cloud (VCN)
+No console da Oracle Cloud: **Networking > Virtual Cloud Networks > Suas Subredes > Default Security List**.
+Em **Ingress Rules**, adicione uma regra:
+- **Source CIDR**: `0.0.0.0/0`
+- **IP Protocol**: `TCP`
+- **Destination Port Range**: `80,8080`
+
+### 2. Liberar o Firewall Interno da VM
+Conecte via SSH na sua máquina Oracle Cloud e rode os comandos conforme a distribuição:
+
+#### No Oracle Linux (`opc`):
+```bash
+sudo firewall-cmd --permanent --add-port=8080/tcp
+sudo firewall-cmd --permanent --add-port=80/tcp
+sudo firewall-cmd --reload
+```
+
+#### No Ubuntu (`ubuntu`):
+```bash
+sudo iptables -I INPUT 6 -m state --state NEW -p tcp --dport 8080 -j ACCEPT
+sudo netfilter-persistent save
+```
+
+### 3. Compilar e Rodar o ntfy na VM
+No terminal do seu servidor Linux:
+
+```bash
+# 1. Instalar dependências (Oracle Linux / RHEL)
+sudo dnf install -y git gcc go nodejs npm
+
+# (Se for Ubuntu, use: sudo apt update && sudo apt install -y git gcc go nodejs npm)
+
+# 2. Clonar o projeto
+git clone https://github.com/rodrigospena/ntfy.git
+cd ntfy
+
+# 3. Compilar o Frontend Web e mover para o servidor
+cd web && npm ci && npx vite build && cd ..
+mkdir -p server/site && cp -r web/build/* server/site/ && cp server/site/index.html server/site/app.html
+
+# 4. Compilar o servidor Go com suporte a SQLite (CGO)
+CGO_ENABLED=1 go build -o ntfy main.go
+
+# 5. Executar o servidor na porta 8080
+./ntfy serve --listen-http ":8080"
+```
+
+Acesse a interface web em: `http://SEU_IP_PUBLICO:8080/app.html`
+
+---
+
 [![Release](https://img.shields.io/github/release/binwiederhier/ntfy.svg?color=success&style=flat-square)](https://github.com/binwiederhier/ntfy/releases/latest)
 [![Go Reference](https://pkg.go.dev/badge/heckel.io/ntfy.svg)](https://pkg.go.dev/heckel.io/ntfy/v2)
 [![Tests](https://github.com/binwiederhier/ntfy/workflows/test/badge.svg)](https://github.com/binwiederhier/ntfy/actions)
