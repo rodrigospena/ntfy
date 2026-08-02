@@ -57,6 +57,7 @@ const PublishDialog = (props) => {
   const [tags, setTags] = useState("");
   const [priority, setPriority] = useState(3);
   const [clickUrl, setClickUrl] = useState("");
+  const [iconUrl, setIconUrl] = useState("");
   const [attachUrl, setAttachUrl] = useState("");
   const [attachFile, setAttachFile] = useState(null);
   const [filename, setFilename] = useState("");
@@ -69,6 +70,7 @@ const PublishDialog = (props) => {
 
   const [showTopicUrl, setShowTopicUrl] = useState("");
   const [showClickUrl, setShowClickUrl] = useState(false);
+  const [showIconUrl, setShowIconUrl] = useState(false);
   const [showAttachUrl, setShowAttachUrl] = useState(false);
   const [showEmail, setShowEmail] = useState(false);
   const [showCall, setShowCall] = useState(false);
@@ -134,6 +136,9 @@ const PublishDialog = (props) => {
     }
     if (clickUrl.trim()) {
       url.searchParams.append("click", clickUrl.trim());
+    }
+    if (iconUrl.trim()) {
+      url.searchParams.append("icon", iconUrl.trim());
     }
     if (attachUrl.trim()) {
       url.searchParams.append("attach", attachUrl.trim());
@@ -485,6 +490,33 @@ const PublishDialog = (props) => {
               />
             </ClosableRow>
           )}
+          {showIconUrl && (
+            <ClosableRow
+              disabled={disabled}
+              closeLabel="Remover Ícone"
+              onClose={() => {
+                setIconUrl("");
+                setShowIconUrl(false);
+              }}
+            >
+              <TextField
+                margin="dense"
+                label="URL do Ícone / Logo"
+                placeholder="https://exemplo.com/minha-logo.png"
+                value={iconUrl}
+                onChange={(ev) => setIconUrl(ev.target.value)}
+                disabled={disabled}
+                type="url"
+                variant="standard"
+                fullWidth
+                slotProps={{
+                  htmlInput: {
+                    "aria-label": "URL do Ícone",
+                  },
+                }}
+              />
+            </ClosableRow>
+          )}
           {showEmail && (
             <ClosableRow
               disabled={disabled}
@@ -661,6 +693,16 @@ const PublishDialog = (props) => {
                 label={t("publish_dialog_chip_click_label")}
                 aria-label={t("publish_dialog_chip_click_label")}
                 onClick={() => setShowClickUrl(true)}
+                sx={{ marginRight: 1, marginBottom: 1 }}
+              />
+            )}
+            {!showIconUrl && (
+              <Chip
+                clickable
+                disabled={disabled}
+                label="Ícone / Logo"
+                aria-label="Ícone / Logo"
+                onClick={() => setShowIconUrl(true)}
                 sx={{ marginRight: 1, marginBottom: 1 }}
               />
             )}
