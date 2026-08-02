@@ -1,11 +1,18 @@
 ---
 name: schedule
-description: Schedule automated notifications, timers, or background checks.
+description: Schedule automated background tasks, periodic checks, or timers aligned with PXOS compact context rules.
 ---
 
-# /schedule — Automation & Timers Workflow
+# /schedule — PXOS Background Task & Timer Scheduling
 
-Follow this procedure when triggered:
-1. Parse requested interval or timer duration.
-2. Use the `schedule` tool to set one-shot timer or recurring cron job.
-3. Report schedule creation status to the user.
+When this workflow is invoked:
+
+1. **Assess Task & Frequency**:
+   - Determine whether a one-shot timer or recurring cron check is required.
+
+2. **Execute Scheduler Tool**:
+   - Use `schedule` with clear notification prompt.
+   - Avoid manual sleep loops or blocking background commands.
+
+3. **Log & Compact**:
+   - Log active background schedules in `.ai/CURRENT_SPEC.md` if long-running.

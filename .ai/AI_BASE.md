@@ -81,3 +81,39 @@ A task is not complete unless it is:
 - Reasonably validated
 - Free of unnecessary complexity
 - **Git Commit messages**: All commit messages MUST be written in English following the Conventional Commits standard (e.g., `feat: ...`, `fix: ...`, `docs: ...`).
+
+---
+
+## Session Opener Templates
+
+### Standard
+
+You have access to the following context files. Read all of them before doing anything.
+
+.ai/AI_BASE.md — your operating rules
+
+.ai/PROJECT_CONTEXT.md — project context
+
+.ai/CURRENT_SPEC.md — current task spec
+
+Do not implement anything until you have completed the Discover and Plan phases and I have confirmed the plan.
+
+### Extended (when task touches extended context files)
+
+You have access to the following context files. Read all of them before doing anything.
+
+.ai/AI_BASE.md — your operating rules
+
+.ai/PROJECT_CONTEXT.md — project context
+
+.ai/CURRENT_SPEC.md — current task spec
+
+.ai/[EXTENDED_FILE].md — [describe what it covers]
+
+Do not implement anything until you have completed the Discover and Plan phases and I have confirmed the plan.
+
+---
+
+## Reference
+
+Full documentation: https://github.com/madebypx/PXOS

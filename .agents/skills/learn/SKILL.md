@@ -1,11 +1,19 @@
 ---
 name: learn
-description: Capture corrections, workspace patterns, and domain insights to persist for future tasks.
+description: Capture workspace patterns, corrections, and architectural decisions into PXOS context files (.ai/).
 ---
 
-# /learn — Workspace Knowledge Capture
+# /learn — PXOS Context Compaction & Pattern Capture
 
-Follow this procedure when triggered:
-1. Extract key lessons, corrections, or conventions from recent interaction.
-2. Update `.ai/PROJECT_CONTEXT.md` or `.ai/DECISION_LOG.md` with the new rule/pattern.
-3. Keep instructions concise and actionable.
+When this workflow is invoked:
+
+1. **Extract Insights**:
+   - Identify new architectural patterns, user corrections, environment configurations, or domain rules discovered during the session.
+
+2. **Update Core PXOS Files**:
+   - Update `.ai/PROJECT_CONTEXT.md` for permanent project rules, tech stack details, or directory structure updates.
+   - Append to `.ai/DECISION_LOG.md` for durable architectural, product, or design decisions.
+   - If domain-specific or data-model invariants were introduced, create or update `.ai/DOMAIN_RULES.md` or `.ai/DATA_MODEL.md`.
+
+3. **Verify Conventions**:
+   - Ensure commit history aligns with English Conventional Commits (`feat: ...`, `fix: ...`, `docs: ...`).
