@@ -63,13 +63,15 @@ export const toNotificationParams = ({ message, defaultTitle, topicRoute, baseUr
   const tag = notificationTag(baseUrl, topic, sequenceId);
   const subscriptionId = `${baseUrl}/${topic}`;
 
+  const iconUrl = message.icon || (isImage(message.attachment) ? message.attachment.url : icon);
+
   // https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API
   return [
     formatTitleWithDefault(message, defaultTitle),
     {
       body: formatMessage(message),
       badge,
-      icon,
+      icon: iconUrl,
       image,
       timestamp: message.time * 1000,
       tag, // Scoped by baseUrl/topic/sequenceId to avoid cross-topic collisions
