@@ -23,6 +23,7 @@ import Account from "./Account";
 import EmailVerify from "./EmailVerify";
 import PasswordReset from "./PasswordReset";
 import PasswordResetRequest from "./PasswordResetRequest";
+import TopicLandingPage from "./TopicLandingPage";
 import initI18n from "../app/i18n"; // Translations!
 import prefs from "../app/Prefs";
 import RTLCacheProvider from "./RTLCacheProvider";
@@ -79,6 +80,7 @@ const App = () => {
               <ErrorBoundary>
                 <Routes>
                   <Route element={<AuthLayout />}>
+                    <Route path={routes.topicLanding} element={<TopicLandingPage />} />
                     <Route path={routes.login} element={<Login />} />
                     <Route path={routes.signup} element={<Signup />} />
                     <Route path={routes.passwordResetRequest} element={<PasswordResetRequest />} />

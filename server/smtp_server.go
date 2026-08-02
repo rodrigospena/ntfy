@@ -85,7 +85,7 @@ type smtpSession struct {
 func (s *smtpSession) AuthPlain(username, password string) error {
 	logem(s.conn).Field("smtp_username", username).Debug("AUTH PLAIN (with username %s)", username)
 	s.mu.Lock()
-	s.basicAuth = base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", username, password)))
+	s.basicAuth = base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "%s:%s", username, password))
 	s.mu.Unlock()
 	return nil
 }

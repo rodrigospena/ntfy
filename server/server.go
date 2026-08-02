@@ -101,6 +101,7 @@ var (
 	webAppEmailVerifyRegex        = regexp.MustCompile(`^/account/email/verify/[-_A-Za-z0-9]+$`)   // Magic-link landing (served by the web app)
 	webAppPasswordResetPathPrefix = "/account/password/reset/"                                     // Browser landing route; raw token appended
 	webAppPasswordResetRegex      = regexp.MustCompile(`^/account/password/reset/[-_A-Za-z0-9]+$`) // Password-reset landing (served by the web app)
+	webAppTopicSubRegex           = regexp.MustCompile(`^/sub/[-_A-Za-z0-9]{1,64}$`)               // Topic subscription landing page (served by web app)
 
 	accountPath                                          = "/account"
 	matrixPushPath                                       = "/_matrix/push/v1/notify"
@@ -166,6 +167,7 @@ var (
 const (
 	firebaseControlTopic     = "~control"                // See Android if changed
 	firebasePollTopic        = "~poll"                   // See iOS if changed (DISABLED for now)
+	_                        = firebasePollTopic
 	emptyMessageBody         = "triggered"               // Used when a message body is empty
 	newMessageBody           = "New message"             // Used in poll requests as generic message
 	defaultAttachmentMessage = "You received a file: %s" // Used if message body is empty, and there is an attachment
@@ -702,8 +704,8 @@ func (s *Server) handleInternal(w http.ResponseWriter, r *http.Request, v *visit
 		return s.limitRequests(s.authorizeTopicRead(s.handleSubscribeWS))(w, r, v)
 	} else if r.Method == http.MethodGet && authPathRegex.MatchString(r.URL.Path) {
 		return s.limitRequests(s.authorizeTopicRead(s.handleTopicAuth))(w, r, v)
-	} else if r.Method == http.MethodGet && (webAppEmailVerifyRegex.MatchString(r.URL.Path) || webAppPasswordResetRegex.MatchString(r.URL.Path)) {
-		return s.ensureWebEnabled(s.handleWebAppNoIndex)(w, r, v) // Magic-link landing pages (client-side routes)
+	} else if r.Method == http.MethodGet && (webAppEmailVerifyRegex.MatchString(r.URL.Path) || webAppPasswordResetRegex.MatchString(r.URL.Path) || webAppTopicSubRegex.MatchString(r.URL.Path)) {
+		return s.ensureWebEnabled(s.handleWebAppNoIndex)(w, r, v) // Magic-link & Topic sub landing pages (client-side routes)
 	} else if r.Method == http.MethodGet && (topicPathRegex.MatchString(r.URL.Path) || externalTopicPathRegex.MatchString(r.URL.Path)) {
 		return s.ensureWebEnabled(s.handleTopic)(w, r, v)
 	}
