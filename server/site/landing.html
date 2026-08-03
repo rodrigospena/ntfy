@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscrição de Notificações</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+      --card-bg: rgba(255, 255, 255, 0.07);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-color: #6366f1;
+      --accent-hover: #4f46e5;
+      --success-color: #10b981;
+      --success-bg: rgba(16, 185, 129, 0.15);
+      --warning-color: #f59e0b;
+      --warning-bg: rgba(245, 158, 11, 0.15);
+      --danger-color: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      background-attachment: fixed;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+
+    .icon-wrapper {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 1.5rem;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+      position: relative;
+    }
+
+    .icon-wrapper svg {
+      width: 44px;
+      height: 44px;
+      fill: var(--text-main);
+      transition: transform 0.3s ease;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.85rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 1rem;
+      letter-spacing: 0.5px;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.description {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 2rem;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      border: none;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      transition: all 0.25s ease;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+      background: linear-gradient(135deg, var(--accent-color) 0%, #8b5cf6 100%);
+      color: #ffffff;
+    }
+
+    .btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6);
+      filter: brightness(1.1);
+    }
+
+    .btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .status-alert {
+      display: none;
+      padding: 1rem;
+      border-radius: 14px;
+      font-size: 0.9rem;
+      text-align: left;
+      margin-bottom: 1.5rem;
+      line-height: 1.4;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .status-alert.active {
+      display: flex;
+    }
+
+    .status-alert.success {
+      background: var(--success-bg);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+
+    .status-alert.warning {
+      background: var(--warning-bg);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+    }
+
+    .status-alert.danger {
+      background: var(--danger-bg);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+
+    .status-alert svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      fill: currentColor;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="icon-wrapper" id="iconWrapper">
+        <svg viewBox="0 0 24 24" id="bellIcon">
+          <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+        </svg>
+      </div>
+
+      <div class="badge" id="topicBadge">Notificações</div>
+
+      <h1 id="topicTitle">Carregando...</h1>
+      <p class="description" id="topicDesc">
+        Receba alertas e comunicados importantes diretamente no seu dispositivo sem precisar instalar nada.
+      </p>
+
+      <div class="status-alert warning" id="alertWarning">
+        <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+        <span>As notificações estão bloqueadas no seu navegador. Para receber os avisos, ative as permissões nas configurações do site.</span>
+      </div>
+
+      <div class="status-alert danger" id="alertError">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        <span id="errorMessage">Não foi possível realizar a inscrição.</span>
+      </div>
+
+      <div class="status-alert success" id="alertSuccess">
+        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        <span>Inscrição ativa! Você receberá todos os avisos deste canal diretamente na tela do seu dispositivo.</span>
+      </div>
+
+      <button class="btn" id="btnSubscribe">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+        </svg>
+        <span id="btnText">Quero Receber Notificações</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    function getTopic() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let t = urlParams.get("topic");
+      if (!t) {
+        const parts = window.location.pathname.split("/").filter(Boolean);
+        if (parts.length > 0 && !parts[parts.length - 1].includes("landing")) {
+          t = parts[parts.length - 1];
+        }
+      }
+      return t || "cafecomfamilia";
+    }
+
+    function formatTopicName(topic) {
+      return topic
+        .replace(/[-_]/g, " ")
+        .replace(/\b\w/g, char => char.toUpperCase());
+    }
+
+    const topic = getTopic();
+    const formattedName = formatTopicName(topic);
+
+    document.getElementById("topicTitle").textContent = formattedName;
+    document.getElementById("topicBadge").textContent = `Canal: ${topic}`;
+    document.title = `Notificações — ${formattedName}`;
+
+    const btnSubscribe = document.getElementById("btnSubscribe");
+    const btnText = document.getElementById("btnText");
+    const alertWarning = document.getElementById("alertWarning");
+    const alertError = document.getElementById("alertError");
+    const alertSuccess = document.getElementById("alertSuccess");
+    const errorMessage = document.getElementById("errorMessage");
+
+    function checkPermission() {
+      if ("Notification" in window && Notification.permission === "denied") {
+        alertWarning.classList.add("active");
+      } else {
+        alertWarning.classList.remove("active");
+      }
+    }
+
+    checkPermission();
+
+    async function registerSW() {
+      if ('serviceWorker' in navigator) {
+        try {
+          return await navigator.serviceWorker.register('/sw.js');
+        } catch (e) {
+          console.warn("SW registration failed:", e);
+        }
+      }
+      return null;
+    }
+
+    btnSubscribe.addEventListener("click", async () => {
+      alertError.classList.remove("active");
+      alertSuccess.classList.remove("active");
+
+      if (!("Notification" in window)) {
+        errorMessage.textContent = "Este navegador não suporta notificações de push.";
+        alertError.classList.add("active");
+        return;
+      }
+
+      btnSubscribe.disabled = true;
+      btnText.textContent = "Solicitando permissão...";
+
+      try {
+        const permission = await Notification.requestPermission();
+        checkPermission();
+
+        if (permission === "granted") {
+          btnText.textContent = "Ativando inscrição...";
+          await registerSW();
+
+          alertSuccess.classList.add("active");
+          btnText.textContent = "Inscrição Ativa ✓";
+          btnSubscribe.style.background = "linear-gradient(135deg, #10b981 0%, #059669 100%)";
+          btnSubscribe.disabled = true;
+        } else if (permission === "denied") {
+          alertWarning.classList.add("active");
+          btnText.textContent = "Permissão Negada";
+          btnSubscribe.disabled = false;
+        }
+      } catch (err) {
+        console.error("Subscription error:", err);
+        errorMessage.textContent = "Não foi possível concluir a inscrição. Tente novamente.";
+        alertError.classList.add("active");
+        btnText.textContent = "Tentar Novamente";
+        btnSubscribe.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
