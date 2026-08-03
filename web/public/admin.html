@@ -38,7 +38,6 @@
       overflow-x: hidden;
     }
 
-    /* Left Sidebar */
     .sidebar {
       width: 260px;
       background: var(--sidebar-bg);
@@ -151,7 +150,6 @@
       color: #ffffff;
     }
 
-    /* Main Content Area */
     .main-wrapper {
       margin-left: 260px;
       flex: 1;
@@ -176,7 +174,6 @@
       justify-content: space-between;
     }
 
-    /* Metrics Cards */
     .metrics-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -208,7 +205,6 @@
       color: #ffffff;
     }
 
-    /* Card Component */
     .card {
       background: var(--card-bg);
       backdrop-filter: blur(16px);
@@ -228,7 +224,6 @@
       gap: 0.5rem;
     }
 
-    /* Form Elements */
     .form-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -315,7 +310,6 @@
       transform: translateY(-1px);
     }
 
-    /* Table Component */
     .table-container {
       overflow-x: auto;
     }
@@ -377,7 +371,6 @@
       color: #f87171;
     }
 
-    /* Modal Component */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -433,7 +426,7 @@
       </li>
       <li class="nav-item">
         <button onclick="switchTab('subscribers', this)">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
           Inscritos & Dispositivos
         </button>
       </li>
@@ -823,19 +816,22 @@
       if (!topic || !message) return;
 
       try {
-        const headers = { "Content-Type": "text/plain; charset=utf-8" };
-        if (title) headers["Title"] = title;
-        if (priority) headers["Priority"] = priority;
-        if (icon) headers["Icon"] = icon;
-        if (attach) headers["Attach"] = attach;
-        if (email) headers["Email"] = email;
-        if (tags) headers["Tags"] = tags;
-        if (click) headers["Click"] = click;
+        const payload = {
+          topic: topic,
+          message: message
+        };
+        if (title) payload.title = title;
+        if (priority) payload.priority = parseInt(priority, 10);
+        if (icon) payload.icon = icon;
+        if (attach) payload.attach = attach;
+        if (email) payload.email = email;
+        if (tags) payload.tags = tags.split(",").map(t => t.trim()).filter(Boolean);
+        if (click) payload.click = click;
 
         const res = await fetch(`/${encodeURIComponent(topic)}`, {
           method: "POST",
-          headers: headers,
-          body: message
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
         });
 
         if (res.ok) {
