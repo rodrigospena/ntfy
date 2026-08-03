@@ -30,6 +30,11 @@ func (s *Server) handleLandingPage(w http.ResponseWriter, r *http.Request, v *vi
 	return s.handleStatic(w, r, v)
 }
 
+func (s *Server) handleAdminPage(w http.ResponseWriter, r *http.Request, v *visitor) error {
+	r.URL.Path = "/admin.html"
+	return s.handleStatic(w, r, v)
+}
+
 type landingSubscribeRequest struct {
 	Topic    string `json:"topic"`
 	Nickname string `json:"nickname"`

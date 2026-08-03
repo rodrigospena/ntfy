@@ -104,6 +104,7 @@ var (
 	webAppPasswordResetRegex      = regexp.MustCompile(`^/account/password/reset/[-_A-Za-z0-9]+$`) // Password-reset landing (served by the web app)
 	webAppTopicSubRegex           = regexp.MustCompile(`^/sub/[-_A-Za-z0-9]{1,64}$`)               // Topic subscription landing page (served by web app)
 	webAppLandingRegex            = regexp.MustCompile(`^/landing(/[-_A-Za-z0-9]{1,64})?$`)        // Dedicated standalone landing page
+	webAppAdminRegex              = regexp.MustCompile(`^/admin(/.*)?$`)                           // Dedicated standalone admin dashboard
 
 	accountPath                                          = "/account"
 	matrixPushPath                                       = "/_matrix/push/v1/notify"
@@ -597,6 +598,8 @@ func (s *Server) handleInternal(w http.ResponseWriter, r *http.Request, v *visit
 		return s.handleLandingSubscribe(w, r, v)
 	} else if r.Method == http.MethodGet && r.URL.Path == "/v1/subscribers" {
 		return s.handleSubscribersList(w, r, v)
+	} else if r.Method == http.MethodGet && (r.URL.Path == "/admin" || webAppAdminRegex.MatchString(r.URL.Path)) {
+		return s.ensureWebEnabled(s.handleAdminPage)(w, r, v)
 	} else if r.Method == http.MethodGet && r.URL.Path == webAppConfigPath {
 		return s.ensureWebEnabled(s.handleWebConfig)(w, r, v)
 	} else if r.Method == http.MethodGet && r.URL.Path == webAppManifestPath {

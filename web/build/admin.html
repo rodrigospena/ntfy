@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Controle — Notificações</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+      --card-bg: rgba(255, 255, 255, 0.06);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-color: #6366f1;
+      --accent-hover: #4f46e5;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      padding: 2rem 1.5rem;
+      background-attachment: fixed;
+    }
+
+    .header {
+      max-width: 1200px;
+      margin: 0 auto 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand-icon svg {
+      width: 24px;
+      height: 24px;
+      fill: #ffffff;
+    }
+
+    .brand-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn-secondary {
+      padding: 0.6rem 1.2rem;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: var(--text-main);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .metric-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .metric-title {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 900px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 1.75rem;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+      font-weight: 500;
+    }
+
+    .input-field, .textarea-field, .select-field {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      color: #ffffff;
+      font-size: 0.9rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .input-field:focus, .textarea-field:focus, .select-field:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+    }
+
+    .textarea-field {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 0.85rem;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-color) 0%, #8b5cf6 100%);
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 0.9rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.9rem;
+    }
+
+    th {
+      color: var(--text-muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .tag-badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: rgba(99, 102, 241, 0.2);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+    }
+
+    .status-toast {
+      display: none;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .status-toast.success {
+      display: block;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+
+    .status-toast.error {
+      display: block;
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+        </svg>
+      </div>
+      <div class="brand-title">Painel de Controle</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" onclick="loadSubscribers()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+        Atualizar Dados
+      </button>
+      <a href="/app.html" class="btn-secondary" target="_blank">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>
+        Dashboard Técnico (ntfy)
+      </a>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-title">Total de Inscritos</div>
+        <div class="metric-value" id="metricTotal">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Canais Ativos</div>
+        <div class="metric-value" id="metricTopics">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-title">Status do Servidor</div>
+        <div class="metric-value" style="color: #34d399; font-size: 1.4rem;">● Online</div>
+      </div>
+    </section>
+
+    <section class="content-grid">
+      <!-- Direct Dispatcher Form -->
+      <div class="card">
+        <div class="card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          Disparar Notificação
+        </div>
+
+        <div id="toastMessage" class="status-toast"></div>
+
+        <form id="dispatchForm">
+          <div class="form-group">
+            <label class="form-label" for="sendTopic">Canal / Tópico:</label>
+            <input type="text" id="sendTopic" class="input-field" value="cafecomfamilia" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="sendTitle">Título do Aviso (opcional):</label>
+            <input type="text" id="sendTitle" class="input-field" placeholder="Ex: Comunicado Importante">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="sendMessage">Mensagem:</label>
+            <textarea id="sendMessage" class="textarea-field" placeholder="Digite a mensagem para enviar..." required></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="sendPriority">Prioridade:</label>
+            <select id="sendPriority" class="select-field">
+              <option value="3" selected>Normal</option>
+              <option value="4">Alta (Urgente)</option>
+              <option value="5">Máxima (Alerta Sonoro)</option>
+              <option value="2">Baixa</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            Enviar Notificação
+          </button>
+        </form>
+      </div>
+
+      <!-- Subscribers List Table -->
+      <div class="card">
+        <div class="card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+          Dispositivos & Usuários Cadastrados
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Apelido / Dispositivo</th>
+                <th>Canal (Tópico)</th>
+                <th>Endereço IP</th>
+                <th>Data de Inscrição</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="subscribersTable">
+              <tr>
+                <td colspan="5" style="text-align: center; color: var(--text-muted);">Carregando inscritos...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    async function loadSubscribers() {
+      const tableBody = document.getElementById("subscribersTable");
+      const metricTotal = document.getElementById("metricTotal");
+      const metricTopics = document.getElementById("metricTopics");
+
+      try {
+        const res = await fetch("/v1/subscribers");
+        if (!res.ok) throw new Error("Erro ao buscar inscritos");
+        const data = await res.json();
+        const subs = data.subscribers || [];
+
+        metricTotal.textContent = subs.length;
+        const uniqueTopics = new Set(subs.map(s => s.topic));
+        metricTopics.textContent = uniqueTopics.size;
+
+        if (subs.length === 0) {
+          tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Nenhum dispositivo cadastrado ainda.</td></tr>';
+          return;
+        }
+
+        tableBody.innerHTML = subs.map(sub => {
+          const dateStr = new Date(sub.created_at).toLocaleString("pt-BR");
+          return `
+            <tr>
+              <td>
+                <strong>${escapeHtml(sub.nickname || 'Visitante')}</strong><br>
+                <small style="color: var(--text-muted);">${escapeHtml(sub.device || '')}</small>
+              </td>
+              <td><span class="tag-badge">${escapeHtml(sub.topic)}</span></td>
+              <td><code>${escapeHtml(sub.ip)}</code></td>
+              <td>${dateStr}</td>
+              <td>
+                <button class="btn-secondary" style="padding: 0.35rem 0.7rem; font-size: 0.8rem;" onclick="selectTopic('${escapeHtml(sub.topic)}')">
+                  Selecionar
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join("");
+      } catch (err) {
+        console.error(err);
+        tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--danger-color);">Erro ao carregar lista de inscritos.</td></tr>';
+      }
+    }
+
+    function selectTopic(topic) {
+      document.getElementById("sendTopic").value = topic;
+      document.getElementById("sendMessage").focus();
+    }
+
+    function escapeHtml(text) {
+      return (text || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    document.getElementById("dispatchForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const toast = document.getElementById("toastMessage");
+      toast.className = "status-toast";
+
+      const topic = document.getElementById("sendTopic").value.trim();
+      const title = document.getElementById("sendTitle").value.trim();
+      const message = document.getElementById("sendMessage").value.trim();
+      const priority = document.getElementById("sendPriority").value;
+
+      if (!topic || !message) return;
+
+      try {
+        const headers = { "Content-Type": "text/plain; charset=utf-8" };
+        if (title) headers["Title"] = title;
+        if (priority) headers["Priority"] = priority;
+
+        const res = await fetch(`/${encodeURIComponent(topic)}`, {
+          method: "POST",
+          headers: headers,
+          body: message
+        });
+
+        if (res.ok) {
+          toast.textContent = "Notificação disparada com sucesso!";
+          toast.classList.add("success");
+          document.getElementById("sendMessage").value = "";
+        } else {
+          toast.textContent = `Erro ao disparar: HTTP ${res.status}`;
+          toast.classList.add("error");
+        }
+      } catch (err) {
+        toast.textContent = "Erro de conexão ao disparar a notificação.";
+        toast.classList.add("error");
+      }
+    });
+
+    loadSubscribers();
+  </script>
+</body>
+</html>
