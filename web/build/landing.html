@@ -76,6 +76,13 @@
       justify-content: center;
       box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
       position: relative;
+      overflow: hidden;
+    }
+
+    .icon-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .icon-wrapper svg {
@@ -278,6 +285,8 @@
     </div>
   </div>
 
+  <audio id="notifSound" src="/static/media/ding-C-VaFit1.mp3" preload="auto"></audio>
+
   <script>
     function getTopic() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -344,25 +353,47 @@
     const errorMessage = document.getElementById("errorMessage");
     const successMessage = document.getElementById("successMessage");
     const ipText = document.getElementById("ipText");
+    const notifSound = document.getElementById("notifSound");
 
     let activeSSE = null;
 
-    function connectSSE(topic) {
+    function playNotificationSound() {
+      if (notifSound) {
+        notifSound.currentTime = 0;
+        notifSound.play().catch(e => console.log("Sound play error:", e));
+      }
+    }
+
+    function triggerNotification(msg) {
+      playNotificationSound();
+      const title = msg.title || formattedName;
+      const options = {
+        body: msg.message,
+        icon: msg.icon || '/static/images/pwa-192x192.png',
+        tag: msg.id || String(Date.now()),
+        data: { url: msg.click || window.location.href }
+      };
+
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(reg => {
+          reg.showNotification(title, options);
+        }).catch(() => {
+          new Notification(title, options);
+        });
+      } else {
+        new Notification(title, options);
+      }
+    }
+
+    function connectSSE(topicName) {
       if (activeSSE) activeSSE.close();
       try {
-        activeSSE = new EventSource('/' + encodeURIComponent(topic) + '/sse');
+        activeSSE = new EventSource('/' + encodeURIComponent(topicName) + '/sse');
         activeSSE.onmessage = (event) => {
           try {
             const msg = JSON.parse(event.data);
             if (msg.event === 'message' && Notification.permission === 'granted') {
-              navigator.serviceWorker.ready.then(reg => {
-                reg.showNotification(msg.title || formattedName, {
-                  body: msg.message,
-                  icon: msg.icon || '/static/images/pwa-192x192.png',
-                  tag: msg.id,
-                  data: { url: msg.click || window.location.href }
-                });
-              });
+              triggerNotification(msg);
             }
           } catch (e) {
             console.error("Error parsing SSE message:", e);
@@ -424,7 +455,6 @@
 
           connectSSE(topic);
 
-          // Record registration in internal SQLite database
           const nickname = inputNickname.value.trim();
           try {
             const dbRes = await fetch('/v1/landing/subscribe', {
@@ -447,7 +477,6 @@
             console.warn("Error saving subscriber to DB:", dbErr);
           }
 
-          // Register WebPush if server VAPID key is configured
           try {
             const configRes = await fetch('/v1/config');
             if (configRes.ok) {

@@ -18,6 +18,14 @@ type Subscriber struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type TopicItem struct {
+	Name         string    `json:"name"`
+	DisplayName  string    `json:"display_name"`
+	DefaultIcon  string    `json:"default_icon"`
+	DefaultImage string    `json:"default_image"`
+	CreatedAt    time.Time `json:"created_at"`
+}
+
 type SubscriberStore struct {
 	db *sql.DB
 	mu sync.Mutex
@@ -39,17 +47,47 @@ func NewSubscriberStore(filename string) (*SubscriberStore, error) {
 		created_at DATETIME NOT NULL
 	);
 	CREATE INDEX IF NOT EXISTS idx_subscribers_topic ON subscribers(topic);
+
+	CREATE TABLE IF NOT EXISTS custom_topics (
+		name TEXT PRIMARY KEY,
+		display_name TEXT,
+		default_icon TEXT,
+		default_image TEXT,
+		created_at DATETIME NOT NULL
+	);
 	`
 
 	if _, err := db.Exec(createTableSQL); err != nil {
 		db.Close()
-		return nil, fmt.Errorf("failed to create subscribers table: %w", err)
+		return nil, fmt.Errorf("failed to create subscribers/topics tables: %w", err)
 	}
 
-	return &SubscriberStore{db: db}, nil
+	store := &SubscriberStore{db: db}
+	_ = store.seedDefaultTopic()
+
+	return store, nil
 }
 
-func (s *SubscriberStore) Add(topic, nickname, ip, device string) (*Subscriber, error) {
+func (s *SubscriberStore) seedDefaultTopic() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	var count int
+	err := s.db.QueryRow("SELECT COUNT(*) FROM custom_topics").Scan(&count)
+	if err != nil {
+		return err
+	}
+	if count == 0 {
+		now := time.Now()
+		_, err = s.db.Exec(
+			"INSERT INTO custom_topics (name, display_name, default_icon, default_image, created_at) VALUES (?, ?, ?, ?, ?)",
+			"cafecomfamilia", "Café com Família", "", "", now,
+		)
+	}
+	return err
+}
+
+func (s *SubscriberStore) AddSubscriber(topic, nickname, ip, device string) (*Subscriber, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -77,7 +115,7 @@ func (s *SubscriberStore) Add(topic, nickname, ip, device string) (*Subscriber, 
 	}, nil
 }
 
-func (s *SubscriberStore) ListAll() ([]*Subscriber, error) {
+func (s *SubscriberStore) ListAllSubscribers() ([]*Subscriber, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -101,6 +139,88 @@ func (s *SubscriberStore) ListAll() ([]*Subscriber, error) {
 	}
 
 	return result, nil
+}
+
+func (s *SubscriberStore) AddTopic(name, displayName, defaultIcon, defaultImage string) (*TopicItem, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	now := time.Now()
+	if displayName == "" {
+		displayName = name
+	}
+	_, err := s.db.Exec(
+		"INSERT INTO custom_topics (name, display_name, default_icon, default_image, created_at) VALUES (?, ?, ?, ?, ?)",
+		name, displayName, defaultIcon, defaultImage, now,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TopicItem{
+		Name:         name,
+		DisplayName:  displayName,
+		DefaultIcon:  defaultIcon,
+		DefaultImage: defaultImage,
+		CreatedAt:    now,
+	}, nil
+}
+
+func (s *SubscriberStore) UpdateTopic(name, displayName, defaultIcon, defaultImage string) (*TopicItem, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if displayName == "" {
+		displayName = name
+	}
+	_, err := s.db.Exec(
+		"UPDATE custom_topics SET display_name = ?, default_icon = ?, default_image = ? WHERE name = ?",
+		displayName, defaultIcon, defaultImage, name,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &TopicItem{
+		Name:         name,
+		DisplayName:  displayName,
+		DefaultIcon:  defaultIcon,
+		DefaultImage: defaultImage,
+	}, nil
+}
+
+func (s *SubscriberStore) ListTopics() ([]*TopicItem, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	rows, err := s.db.Query("SELECT name, COALESCE(display_name, ''), COALESCE(default_icon, ''), COALESCE(default_image, ''), created_at FROM custom_topics ORDER BY created_at ASC")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []*TopicItem
+	for rows.Next() {
+		var item TopicItem
+		if err := rows.Scan(&item.Name, &item.DisplayName, &item.DefaultIcon, &item.DefaultImage, &item.CreatedAt); err != nil {
+			return nil, err
+		}
+		result = append(result, &item)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (s *SubscriberStore) DeleteTopic(name string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	_, err := s.db.Exec("DELETE FROM custom_topics WHERE name = ?", name)
+	return err
 }
 
 func (s *SubscriberStore) Close() error {

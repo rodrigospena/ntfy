@@ -55,7 +55,7 @@ func (s *Server) handleLandingSubscribe(w http.ResponseWriter, r *http.Request, 
 		req.Nickname = "Visitante " + ip
 	}
 
-	sub, err := s.subscriberStore.Add(req.Topic, req.Nickname, ip, req.Device)
+	sub, err := s.subscriberStore.AddSubscriber(req.Topic, req.Nickname, ip, req.Device)
 	if err != nil {
 		return err
 	}
@@ -64,13 +64,62 @@ func (s *Server) handleLandingSubscribe(w http.ResponseWriter, r *http.Request, 
 }
 
 func (s *Server) handleSubscribersList(w http.ResponseWriter, _ *http.Request, _ *visitor) error {
-	subs, err := s.subscriberStore.ListAll()
+	subs, err := s.subscriberStore.ListAllSubscribers()
 	if err != nil {
 		return err
 	}
 	return s.writeJSON(w, map[string]any{
 		"subscribers": subs,
 	})
+}
+
+type topicRequest struct {
+	Name         string `json:"name"`
+	DisplayName  string `json:"display_name"`
+	DefaultIcon  string `json:"default_icon"`
+	DefaultImage string `json:"default_image"`
+}
+
+func (s *Server) handleTopicsList(w http.ResponseWriter, _ *http.Request, _ *visitor) error {
+	topics, err := s.subscriberStore.ListTopics()
+	if err != nil {
+		return err
+	}
+	return s.writeJSON(w, map[string]any{
+		"topics": topics,
+	})
+}
+
+func (s *Server) handleTopicAdd(w http.ResponseWriter, r *http.Request, _ *visitor) error {
+	var req topicRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return errHTTPBadRequest
+	}
+	if req.Name == "" {
+		return errHTTPBadRequest
+	}
+
+	item, err := s.subscriberStore.AddTopic(req.Name, req.DisplayName, req.DefaultIcon, req.DefaultImage)
+	if err != nil {
+		return err
+	}
+	return s.writeJSON(w, item)
+}
+
+func (s *Server) handleTopicUpdate(w http.ResponseWriter, r *http.Request, _ *visitor) error {
+	var req topicRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return errHTTPBadRequest
+	}
+	if req.Name == "" {
+		return errHTTPBadRequest
+	}
+
+	item, err := s.subscriberStore.UpdateTopic(req.Name, req.DisplayName, req.DefaultIcon, req.DefaultImage)
+	if err != nil {
+		return err
+	}
+	return s.writeJSON(w, item)
 }
 
 func (s *Server) handleConfig(w http.ResponseWriter, _ *http.Request, _ *visitor) error {
