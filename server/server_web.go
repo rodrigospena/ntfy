@@ -30,6 +30,44 @@ func (s *Server) handleLandingPage(w http.ResponseWriter, r *http.Request, v *vi
 	return s.handleStatic(w, r, v)
 }
 
+type landingSubscribeRequest struct {
+	Topic    string `json:"topic"`
+	Nickname string `json:"nickname"`
+	Device   string `json:"device"`
+}
+
+func (s *Server) handleLandingSubscribe(w http.ResponseWriter, r *http.Request, v *visitor) error {
+	var req landingSubscribeRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil && err != io.EOF {
+		return errHTTPBadRequest
+	}
+	if req.Topic == "" {
+		return errHTTPBadRequest
+	}
+
+	ip := v.ip.String()
+	if req.Nickname == "" {
+		req.Nickname = "Visitante " + ip
+	}
+
+	sub, err := s.subscriberStore.Add(req.Topic, req.Nickname, ip, req.Device)
+	if err != nil {
+		return err
+	}
+
+	return s.writeJSON(w, sub)
+}
+
+func (s *Server) handleSubscribersList(w http.ResponseWriter, _ *http.Request, _ *visitor) error {
+	subs, err := s.subscriberStore.ListAll()
+	if err != nil {
+		return err
+	}
+	return s.writeJSON(w, map[string]any{
+		"subscribers": subs,
+	})
+}
+
 func (s *Server) handleConfig(w http.ResponseWriter, _ *http.Request, _ *visitor) error {
 	w.Header().Set("Cache-Control", "no-cache")
 	return s.writeJSON(w, s.configResponse())

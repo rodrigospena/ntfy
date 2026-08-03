@@ -71,6 +71,7 @@ type Server struct {
 	attachment        *attachment.Store                   // Attachment store (file system or S3)
 	stripe            stripeAPI                           // Stripe API, can be replaced with a mock
 	priceCache        *util.LookupCache[map[string]int64] // Stripe price ID -> price as cents (USD implied!)
+	subscriberStore   *SubscriberStore                    // SQLite database for landing page subscribers
 	metricsHandler    http.Handler                        // Handles /metrics if enable-metrics set, and listen-metrics-http not set
 	closeChan         chan bool
 	mu                sync.RWMutex
@@ -319,6 +320,10 @@ func New(conf *Config) (*Server, error) {
 			PrefixBitsIPv6: conf.VisitorPrefixBitsIPv6,
 		})
 	}
+	subStore, err := NewSubscriberStore("subscribers.db")
+	if err != nil {
+		return nil, err
+	}
 	s := &Server{
 		config:          conf,
 		db:              pool,
@@ -335,6 +340,7 @@ func New(conf *Config) (*Server, error) {
 		messagesHistory: []int64{messages},
 		visitors:        make(map[string]*visitor),
 		stripe:          stripe,
+		subscriberStore: subStore,
 	}
 	s.priceCache = util.NewLookupCache(s.fetchStripePrices, conf.StripePriceCacheDuration)
 	return s, nil
@@ -587,6 +593,10 @@ func (s *Server) handleInternal(w http.ResponseWriter, r *http.Request, v *visit
 		return s.ensureAdmin(s.handleVersion)(w, r, v)
 	} else if r.Method == http.MethodGet && r.URL.Path == apiConfigPath {
 		return s.handleConfig(w, r, v)
+	} else if r.Method == http.MethodPost && r.URL.Path == "/v1/landing/subscribe" {
+		return s.handleLandingSubscribe(w, r, v)
+	} else if r.Method == http.MethodGet && r.URL.Path == "/v1/subscribers" {
+		return s.handleSubscribersList(w, r, v)
 	} else if r.Method == http.MethodGet && r.URL.Path == webAppConfigPath {
 		return s.ensureWebEnabled(s.handleWebConfig)(w, r, v)
 	} else if r.Method == http.MethodGet && r.URL.Path == webAppManifestPath {
