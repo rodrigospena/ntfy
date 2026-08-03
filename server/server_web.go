@@ -25,6 +25,11 @@ func (s *Server) handleWebAppNoIndex(w http.ResponseWriter, r *http.Request, v *
 	return s.handleWebApp(w, r, v)
 }
 
+func (s *Server) handleLandingPage(w http.ResponseWriter, r *http.Request, v *visitor) error {
+	r.URL.Path = "/landing.html"
+	return s.handleStatic(w, r, v)
+}
+
 func (s *Server) handleConfig(w http.ResponseWriter, _ *http.Request, _ *visitor) error {
 	w.Header().Set("Cache-Control", "no-cache")
 	return s.writeJSON(w, s.configResponse())

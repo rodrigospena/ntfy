@@ -102,6 +102,7 @@ var (
 	webAppPasswordResetPathPrefix = "/account/password/reset/"                                     // Browser landing route; raw token appended
 	webAppPasswordResetRegex      = regexp.MustCompile(`^/account/password/reset/[-_A-Za-z0-9]+$`) // Password-reset landing (served by the web app)
 	webAppTopicSubRegex           = regexp.MustCompile(`^/sub/[-_A-Za-z0-9]{1,64}$`)               // Topic subscription landing page (served by web app)
+	webAppLandingRegex            = regexp.MustCompile(`^/landing(/[-_A-Za-z0-9]{1,64})?$`)        // Dedicated standalone landing page
 
 	accountPath                                          = "/account"
 	matrixPushPath                                       = "/_matrix/push/v1/notify"
@@ -704,6 +705,8 @@ func (s *Server) handleInternal(w http.ResponseWriter, r *http.Request, v *visit
 		return s.limitRequests(s.authorizeTopicRead(s.handleSubscribeWS))(w, r, v)
 	} else if r.Method == http.MethodGet && authPathRegex.MatchString(r.URL.Path) {
 		return s.limitRequests(s.authorizeTopicRead(s.handleTopicAuth))(w, r, v)
+	} else if r.Method == http.MethodGet && webAppLandingRegex.MatchString(r.URL.Path) {
+		return s.ensureWebEnabled(s.handleLandingPage)(w, r, v)
 	} else if r.Method == http.MethodGet && (webAppEmailVerifyRegex.MatchString(r.URL.Path) || webAppPasswordResetRegex.MatchString(r.URL.Path) || webAppTopicSubRegex.MatchString(r.URL.Path)) {
 		return s.ensureWebEnabled(s.handleWebAppNoIndex)(w, r, v) // Magic-link & Topic sub landing pages (client-side routes)
 	} else if r.Method == http.MethodGet && (topicPathRegex.MatchString(r.URL.Path) || externalTopicPathRegex.MatchString(r.URL.Path)) {
