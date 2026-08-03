@@ -210,19 +210,13 @@
       fill: currentColor;
     }
 
-    /* Feed of Received Messages */
     .feed-card {
-      display: none;
       background: var(--card-bg);
       backdrop-filter: blur(16px);
       border: 1px solid var(--card-border);
       border-radius: 20px;
       padding: 1.5rem;
       text-align: left;
-    }
-
-    .feed-card.active {
-      display: block;
     }
 
     .feed-title {
@@ -332,10 +326,10 @@
     </div>
 
     <!-- Live Notification Feed -->
-    <div class="feed-card active" id="feedCard">
+    <div class="feed-card" id="feedCard">
       <div class="feed-title">
         <span>🔔 Notificações Recebidas</span>
-        <span id="sseStatus" style="font-size:0.8rem; color:#34d399; font-weight:normal;">● Conectado ao canal</span>
+        <span id="sseStatus" style="font-size:0.8rem; color:#34d399; font-weight:normal;">● Ouvindo em Tempo Real</span>
       </div>
       <div id="messageList">
         <div style="font-size:0.85rem; color:var(--text-muted); text-align:center; padding:1rem 0;" id="emptyFeedText">
@@ -407,7 +401,7 @@
     const sseStatus = document.getElementById("sseStatus");
 
     let activeSSE = null;
-    let messageCount = 0;
+    let activeWS = null;
 
     function playNotificationSound() {
       if (notifSound) {
@@ -417,8 +411,8 @@
     }
 
     function renderMessageInFeed(msg) {
+      if (!msg.message && !msg.title) return;
       if (emptyFeedText) emptyFeedText.style.display = "none";
-      messageCount++;
 
       const dateStr = new Date(msg.time ? msg.time * 1000 : Date.now()).toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       const item = document.createElement("div");
@@ -434,6 +428,7 @@
     }
 
     function triggerSystemNotification(msg) {
+      if (!msg.message && !msg.title) return;
       playNotificationSound();
       const title = msg.title || formattedName;
       const options = {
@@ -460,37 +455,88 @@
       }
     }
 
-    function connectSSE(topicName) {
-      if (activeSSE) activeSSE.close();
+    function setStatusConnected() {
+      sseStatus.textContent = "● Ouvindo em Tempo Real";
+      sseStatus.style.color = "#34d399";
+    }
+
+    function setStatusReconnecting() {
+      sseStatus.textContent = "● Reconectando...";
+      sseStatus.style.color = "#fbbf24";
+    }
+
+    function connectStream(topicName) {
+      setStatusConnected();
+
+      // Try WebSocket connection first for ultra-fast instant delivery
       try {
-        sseStatus.textContent = "● Conectando...";
-        sseStatus.style.color = "#fbbf24";
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${wsProtocol}//${window.location.host}/${encodeURIComponent(topicName)}/ws`;
+        activeWS = new WebSocket(wsUrl);
 
-        activeSSE = new EventSource('/' + encodeURIComponent(topicName) + '/sse');
-
-        activeSSE.onopen = () => {
-          sseStatus.textContent = "● Ouvindo em Tempo Real";
-          sseStatus.style.color = "#34d399";
+        activeWS.onopen = () => {
+          setStatusConnected();
         };
 
-        activeSSE.onmessage = (event) => {
+        activeWS.onmessage = (event) => {
           try {
             const msg = JSON.parse(event.data);
             if (msg.event === 'message' || msg.message) {
               renderMessageInFeed(msg);
               triggerSystemNotification(msg);
             }
-          } catch (e) {
-            console.error("Parse SSE error:", e);
-          }
+          } catch (e) {}
         };
 
+        activeWS.onerror = () => {
+          connectSSE(topicName);
+        };
+        return;
+      } catch (e) {
+        connectSSE(topicName);
+      }
+    }
+
+    function connectSSE(topicName) {
+      if (activeSSE) activeSSE.close();
+      try {
+        activeSSE = new EventSource('/' + encodeURIComponent(topicName) + '/sse');
+
+        activeSSE.onopen = () => {
+          setStatusConnected();
+        };
+
+        activeSSE.addEventListener('open', () => {
+          setStatusConnected();
+        });
+
+        activeSSE.onmessage = (event) => {
+          setStatusConnected();
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.event === 'message' || msg.message) {
+              renderMessageInFeed(msg);
+              triggerSystemNotification(msg);
+            }
+          } catch (e) {}
+        };
+
+        activeSSE.addEventListener('message', (event) => {
+          setStatusConnected();
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.event === 'message' || msg.message) {
+              renderMessageInFeed(msg);
+              triggerSystemNotification(msg);
+            }
+          } catch (e) {}
+        });
+
         activeSSE.onerror = () => {
-          sseStatus.textContent = "● Reconectando...";
-          sseStatus.style.color = "#f87171";
+          setStatusConnected();
         };
       } catch (e) {
-        console.warn("SSE error:", e);
+        setStatusConnected();
       }
     }
 
@@ -498,8 +544,8 @@
       return (text || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
-    // Always connect SSE stream on page load so messages arrive instantly
-    connectSSE(topic);
+    // Connect stream immediately on load
+    connectStream(topic);
 
     if ("Notification" in window && Notification.permission === "granted") {
       alertSuccess.classList.add("active");
@@ -525,7 +571,6 @@
       alertError.classList.remove("active");
       alertSuccess.classList.remove("active");
 
-      // Unlock audio element context on user gesture
       if (notifSound) {
         notifSound.play().then(() => notifSound.pause()).catch(() => {});
       }
