@@ -118,6 +118,9 @@ const AuthLayout = () => {
 
 const Layout = () => {
   const params = useParams();
+  if (params.baseUrl === "sub" && params.topic) {
+    return <TopicLandingPage />;
+  }
   const { account, setAccount } = useContext(AccountContext);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [sendDialogOpenMode, setSendDialogOpenMode] = useState("");
