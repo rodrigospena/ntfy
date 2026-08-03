@@ -36,6 +36,7 @@
       background: var(--bg-gradient);
       color: var(--text-main);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 1.5rem;
@@ -44,7 +45,7 @@
 
     .container {
       width: 100%;
-      max-width: 440px;
+      max-width: 460px;
     }
 
     .card {
@@ -53,21 +54,17 @@
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--card-border);
       border-radius: 24px;
-      padding: 2.5rem 2rem;
+      padding: 2.25rem 1.75rem;
       text-align: center;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      margin-bottom: 1.5rem;
     }
 
     .icon-wrapper {
-      width: 90px;
-      height: 90px;
-      margin: 0 auto 1.5rem;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.25rem;
       border-radius: 50%;
       background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
       border: 1px solid rgba(255, 255, 255, 0.15);
@@ -76,20 +73,12 @@
       justify-content: center;
       box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
       position: relative;
-      overflow: hidden;
-    }
-
-    .icon-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
     }
 
     .icon-wrapper svg {
-      width: 44px;
-      height: 44px;
+      width: 40px;
+      height: 40px;
       fill: var(--text-main);
-      transition: transform 0.3s ease;
     }
 
     .badge {
@@ -101,14 +90,13 @@
       font-size: 0.85rem;
       color: var(--text-muted);
       font-weight: 500;
-      margin-bottom: 1rem;
-      letter-spacing: 0.5px;
+      margin-bottom: 0.85rem;
     }
 
     h1 {
       font-size: 1.75rem;
       font-weight: 700;
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.5rem;
       line-height: 1.2;
       background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
       -webkit-background-clip: text;
@@ -117,14 +105,14 @@
     }
 
     p.description {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: var(--text-muted);
       line-height: 1.5;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
     }
 
     .form-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.2rem;
       text-align: left;
     }
 
@@ -132,7 +120,7 @@
       display: block;
       font-size: 0.85rem;
       color: var(--text-muted);
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.4rem;
       font-weight: 500;
     }
 
@@ -145,7 +133,7 @@
       color: #ffffff;
       font-size: 0.95rem;
       outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      transition: border-color 0.2s ease;
     }
 
     .input-field:focus {
@@ -155,45 +143,42 @@
 
     .btn {
       width: 100%;
-      padding: 1rem 1.5rem;
+      padding: 0.95rem 1.25rem;
       border: none;
       border-radius: 14px;
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 0.75rem;
+      gap: 0.6rem;
       transition: all 0.25s ease;
-      text-decoration: none;
-      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
       background: linear-gradient(135deg, var(--accent-color) 0%, #8b5cf6 100%);
       color: #ffffff;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
     }
 
     .btn:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6);
-      filter: brightness(1.1);
     }
 
     .btn:disabled {
-      opacity: 0.75;
+      opacity: 0.8;
       cursor: not-allowed;
-      transform: none;
     }
 
     .status-alert {
       display: none;
-      padding: 1rem;
+      padding: 0.9rem;
       border-radius: 14px;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       text-align: left;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.2rem;
       line-height: 1.4;
       align-items: flex-start;
-      gap: 0.75rem;
+      gap: 0.6rem;
     }
 
     .status-alert.active {
@@ -219,10 +204,71 @@
     }
 
     .status-alert svg {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       flex-shrink: 0;
       fill: currentColor;
+    }
+
+    .feed-card {
+      display: none;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      text-align: left;
+    }
+
+    .feed-card.active {
+      display: block;
+    }
+
+    .feed-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .message-item {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .msg-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.35rem;
+    }
+
+    .msg-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #ffffff;
+    }
+
+    .msg-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .msg-body {
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      line-height: 1.4;
     }
 
     .info-footer {
@@ -231,7 +277,7 @@
       color: var(--text-muted);
       display: flex;
       justify-content: space-between;
-      padding: 0 0.5rem;
+      padding: 0 0.25rem;
     }
   </style>
 </head>
@@ -258,7 +304,7 @@
 
       <div class="status-alert warning" id="alertWarning">
         <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-        <span>As notificações estão bloqueadas no seu navegador. Para receber os avisos, ative as permissões nas configurações do site.</span>
+        <span>As permissões de notificação estão desativadas no navegador. Clique no botão abaixo para ativar.</span>
       </div>
 
       <div class="status-alert danger" id="alertError">
@@ -268,19 +314,32 @@
 
       <div class="status-alert success" id="alertSuccess">
         <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-        <span id="successMessage">Inscrição ativa! Você receberá todos os avisos deste canal diretamente na tela do seu dispositivo.</span>
+        <span id="successMessage">Inscrição ativa! Ouvindo notificações em tempo real.</span>
       </div>
 
       <button class="btn" id="btnSubscribe">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
         </svg>
-        <span id="btnText">Quero Receber Notificações</span>
+        <span id="btnText">Ativar Notificações Neste Dispositivo</span>
       </button>
 
       <div class="info-footer">
         <span id="deviceText">Dispositivo</span>
         <span id="ipText">IP</span>
+      </div>
+    </div>
+
+    <!-- Live Notification Feed -->
+    <div class="feed-card active" id="feedCard">
+      <div class="feed-title">
+        <span>🔔 Notificações Recebidas</span>
+        <span id="sseStatus" style="font-size:0.8rem; color:#34d399; font-weight:normal;">● Conectado ao canal</span>
+      </div>
+      <div id="messageList">
+        <div style="font-size:0.85rem; color:var(--text-muted); text-align:center; padding:1rem 0;" id="emptyFeedText">
+          Aguardando disparos de notificação...
+        </div>
       </div>
     </div>
   </div>
@@ -324,17 +383,6 @@
       return `${browser} (${os})`;
     }
 
-    function urlB64ToUint8Array(base64String) {
-      const padding = '='.repeat((4 - base64String.length % 4) % 4);
-      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-      const rawData = window.atob(base64);
-      const outputArray = new Uint8Array(rawData.length);
-      for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
-      }
-      return outputArray;
-    }
-
     const topic = getTopic();
     const formattedName = formatTopicName(topic);
     const deviceName = getDeviceType();
@@ -350,21 +398,41 @@
     const alertWarning = document.getElementById("alertWarning");
     const alertError = document.getElementById("alertError");
     const alertSuccess = document.getElementById("alertSuccess");
-    const errorMessage = document.getElementById("errorMessage");
     const successMessage = document.getElementById("successMessage");
     const ipText = document.getElementById("ipText");
     const notifSound = document.getElementById("notifSound");
+    const messageList = document.getElementById("messageList");
+    const emptyFeedText = document.getElementById("emptyFeedText");
+    const sseStatus = document.getElementById("sseStatus");
 
     let activeSSE = null;
+    let messageCount = 0;
 
     function playNotificationSound() {
       if (notifSound) {
         notifSound.currentTime = 0;
-        notifSound.play().catch(e => console.log("Sound play error:", e));
+        notifSound.play().catch(e => console.log("Sound error:", e));
       }
     }
 
-    function triggerNotification(msg) {
+    function renderMessageInFeed(msg) {
+      if (emptyFeedText) emptyFeedText.style.display = "none";
+      messageCount++;
+
+      const dateStr = new Date(msg.time ? msg.time * 1000 : Date.now()).toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const item = document.createElement("div");
+      item.className = "message-item";
+      item.innerHTML = `
+        <div class="msg-header">
+          <span class="msg-title">${escapeHtml(msg.title || formattedName)}</span>
+          <span class="msg-time">${dateStr}</span>
+        </div>
+        <div class="msg-body">${escapeHtml(msg.message || '')}</div>
+      `;
+      messageList.prepend(item);
+    }
+
+    function triggerSystemNotification(msg) {
       playNotificationSound();
       const title = msg.title || formattedName;
       const options = {
@@ -374,51 +442,69 @@
         data: { url: msg.click || window.location.href }
       };
 
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.ready.then(reg => {
-          reg.showNotification(title, options);
-        }).catch(() => {
-          new Notification(title, options);
-        });
-      } else {
-        new Notification(title, options);
+      if ("Notification" in window && Notification.permission === "granted") {
+        try {
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(reg => {
+              reg.showNotification(title, options);
+            }).catch(() => {
+              new Notification(title, options);
+            });
+          } else {
+            new Notification(title, options);
+          }
+        } catch (e) {
+          console.log("System notification error:", e);
+        }
       }
     }
 
     function connectSSE(topicName) {
       if (activeSSE) activeSSE.close();
       try {
+        sseStatus.textContent = "● Conectando...";
+        sseStatus.style.color = "#fbbf24";
+
         activeSSE = new EventSource('/' + encodeURIComponent(topicName) + '/sse');
+
+        activeSSE.onopen = () => {
+          sseStatus.textContent = "● Ouvindo em Tempo Real";
+          sseStatus.style.color = "#34d399";
+        };
+
         activeSSE.onmessage = (event) => {
           try {
             const msg = JSON.parse(event.data);
-            if (msg.event === 'message' && Notification.permission === 'granted') {
-              triggerNotification(msg);
+            if (msg.event === 'message' || msg.message) {
+              renderMessageInFeed(msg);
+              triggerSystemNotification(msg);
             }
           } catch (e) {
-            console.error("Error parsing SSE message:", e);
+            console.error("Parse SSE error:", e);
           }
         };
+
+        activeSSE.onerror = () => {
+          sseStatus.textContent = "● Reconectando...";
+          sseStatus.style.color = "#f87171";
+        };
       } catch (e) {
-        console.warn("SSE connection error:", e);
+        console.warn("SSE error:", e);
       }
     }
 
-    function checkPermission() {
-      if ("Notification" in window && Notification.permission === "denied") {
-        alertWarning.classList.add("active");
-      } else {
-        alertWarning.classList.remove("active");
-      }
+    function escapeHtml(text) {
+      return (text || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
-    checkPermission();
+    connectSSE(topic);
 
     if ("Notification" in window && Notification.permission === "granted") {
       alertSuccess.classList.add("active");
       btnText.textContent = "Inscrição Ativa ✓";
       btnSubscribe.style.background = "linear-gradient(135deg, #10b981 0%, #059669 100%)";
-      connectSSE(topic);
+    } else {
+      alertWarning.classList.add("active");
     }
 
     async function registerSW() {
@@ -433,11 +519,15 @@
     }
 
     btnSubscribe.addEventListener("click", async () => {
+      alertWarning.classList.remove("active");
       alertError.classList.remove("active");
       alertSuccess.classList.remove("active");
 
+      if (notifSound) {
+        notifSound.play().then(() => notifSound.pause()).catch(() => {});
+      }
+
       if (!("Notification" in window)) {
-        errorMessage.textContent = "Este navegador não suporta notificações de push.";
         alertError.classList.add("active");
         return;
       }
@@ -447,76 +537,35 @@
 
       try {
         const permission = await Notification.requestPermission();
-        checkPermission();
 
         if (permission === "granted") {
           btnText.textContent = "Ativando inscrição...";
-          const reg = await registerSW();
-
-          connectSSE(topic);
+          await registerSW();
 
           const nickname = inputNickname.value.trim();
           try {
             const dbRes = await fetch('/v1/landing/subscribe', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                topic,
-                nickname,
-                device: deviceName
-              })
+              body: JSON.stringify({ topic, nickname, device: deviceName })
             });
             if (dbRes.ok) {
               const subData = await dbRes.json();
-              if (subData.ip) {
-                ipText.textContent = `IP: ${subData.ip}`;
-                successMessage.textContent = `Inscrição ativa para "${subData.nickname}" (IP: ${subData.ip})! Você receberá todos os avisos diretamente neste dispositivo.`;
-              }
+              if (subData.ip) ipText.textContent = `IP: ${subData.ip}`;
             }
-          } catch (dbErr) {
-            console.warn("Error saving subscriber to DB:", dbErr);
-          }
-
-          try {
-            const configRes = await fetch('/v1/config');
-            if (configRes.ok) {
-              const cfg = await configRes.json();
-              if (cfg.web_push_public_key && reg && reg.pushManager) {
-                const sub = await reg.pushManager.subscribe({
-                  userVisibleOnly: true,
-                  applicationServerKey: urlB64ToUint8Array(cfg.web_push_public_key)
-                });
-                const jsonSub = JSON.parse(JSON.stringify(sub));
-                await fetch('/v1/webpush', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    endpoint: jsonSub.endpoint,
-                    auth: jsonSub.keys.auth,
-                    p256dh: jsonSub.keys.p256dh,
-                    topics: [topic]
-                  })
-                });
-              }
-            }
-          } catch (webPushErr) {
-            console.warn("Web Push registration error:", webPushErr);
-          }
+          } catch (dbErr) {}
 
           alertSuccess.classList.add("active");
           btnText.textContent = "Inscrição Ativa ✓";
           btnSubscribe.style.background = "linear-gradient(135deg, #10b981 0%, #059669 100%)";
           btnSubscribe.disabled = true;
-        } else if (permission === "denied") {
+        } else {
           alertWarning.classList.add("active");
           btnText.textContent = "Permissão Negada";
           btnSubscribe.disabled = false;
         }
       } catch (err) {
-        console.error("Subscription error:", err);
-        errorMessage.textContent = "Não foi possível concluir a inscrição. Tente novamente.";
-        alertError.classList.add("active");
-        btnText.textContent = "Tentar Novamente";
+        console.error(err);
         btnSubscribe.disabled = false;
       }
     });
