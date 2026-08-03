@@ -142,7 +142,7 @@
     }
 
     .btn:disabled {
-      opacity: 0.7;
+      opacity: 0.75;
       cursor: not-allowed;
       transform: none;
     }
@@ -248,6 +248,17 @@
         .replace(/\b\w/g, char => char.toUpperCase());
     }
 
+    function urlB64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+
     const topic = getTopic();
     const formattedName = formatTopicName(topic);
 
@@ -262,6 +273,34 @@
     const alertSuccess = document.getElementById("alertSuccess");
     const errorMessage = document.getElementById("errorMessage");
 
+    let activeSSE = null;
+
+    function connectSSE(topic) {
+      if (activeSSE) activeSSE.close();
+      try {
+        activeSSE = new EventSource('/' + encodeURIComponent(topic) + '/sse');
+        activeSSE.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.event === 'message' && Notification.permission === 'granted') {
+              navigator.serviceWorker.ready.then(reg => {
+                reg.showNotification(msg.title || formattedName, {
+                  body: msg.message,
+                  icon: msg.icon || '/static/images/pwa-192x192.png',
+                  tag: msg.id,
+                  data: { url: msg.click || window.location.href }
+                });
+              });
+            }
+          } catch (e) {
+            console.error("Error parsing SSE message:", e);
+          }
+        };
+      } catch (e) {
+        console.warn("SSE connection error:", e);
+      }
+    }
+
     function checkPermission() {
       if ("Notification" in window && Notification.permission === "denied") {
         alertWarning.classList.add("active");
@@ -271,6 +310,13 @@
     }
 
     checkPermission();
+
+    if ("Notification" in window && Notification.permission === "granted") {
+      alertSuccess.classList.add("active");
+      btnText.textContent = "Inscrição Ativa ✓";
+      btnSubscribe.style.background = "linear-gradient(135deg, #10b981 0%, #059669 100%)";
+      connectSSE(topic);
+    }
 
     async function registerSW() {
       if ('serviceWorker' in navigator) {
@@ -302,7 +348,35 @@
 
         if (permission === "granted") {
           btnText.textContent = "Ativando inscrição...";
-          await registerSW();
+          const reg = await registerSW();
+
+          connectSSE(topic);
+
+          try {
+            const configRes = await fetch('/v1/config');
+            if (configRes.ok) {
+              const cfg = await configRes.json();
+              if (cfg.web_push_public_key && reg && reg.pushManager) {
+                const sub = await reg.pushManager.subscribe({
+                  userVisibleOnly: true,
+                  applicationServerKey: urlB64ToUint8Array(cfg.web_push_public_key)
+                });
+                const jsonSub = JSON.parse(JSON.stringify(sub));
+                await fetch('/v1/webpush', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    endpoint: jsonSub.endpoint,
+                    auth: jsonSub.keys.auth,
+                    p256dh: jsonSub.keys.p256dh,
+                    topics: [topic]
+                  })
+                });
+              }
+            }
+          } catch (webPushErr) {
+            console.warn("Web Push registration error:", webPushErr);
+          }
 
           alertSuccess.classList.add("active");
           btnText.textContent = "Inscrição Ativa ✓";
