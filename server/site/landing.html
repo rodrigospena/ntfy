@@ -403,6 +403,20 @@
     let activeSSE = null;
     let activeWS = null;
 
+    function parseMsgData(rawMsg) {
+      let msg = { ...rawMsg };
+      if (typeof msg.message === 'string' && msg.message.trim().startsWith('{')) {
+        try {
+          const parsed = JSON.parse(msg.message);
+          if (parsed.message) msg.message = parsed.message;
+          if (parsed.title) msg.title = parsed.title;
+          if (parsed.icon) msg.icon = parsed.icon;
+          if (parsed.click) msg.click = parsed.click;
+        } catch (e) {}
+      }
+      return msg;
+    }
+
     function playNotificationSound() {
       if (notifSound) {
         notifSound.currentTime = 0;
@@ -410,7 +424,8 @@
       }
     }
 
-    function renderMessageInFeed(msg) {
+    function renderMessageInFeed(rawMsg) {
+      const msg = parseMsgData(rawMsg);
       if (!msg.message && !msg.title) return;
       if (emptyFeedText) emptyFeedText.style.display = "none";
 
@@ -427,7 +442,8 @@
       messageList.prepend(item);
     }
 
-    function triggerSystemNotification(msg) {
+    function triggerSystemNotification(rawMsg) {
+      const msg = parseMsgData(rawMsg);
       if (!msg.message && !msg.title) return;
       playNotificationSound();
       const title = msg.title || formattedName;
@@ -458,11 +474,6 @@
     function setStatusConnected() {
       sseStatus.textContent = "● Ouvindo em Tempo Real";
       sseStatus.style.color = "#34d399";
-    }
-
-    function setStatusReconnecting() {
-      sseStatus.textContent = "● Reconectando...";
-      sseStatus.style.color = "#fbbf24";
     }
 
     function connectStream(topicName) {
