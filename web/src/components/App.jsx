@@ -79,8 +79,8 @@ const App = () => {
               <CssBaseline />
               <ErrorBoundary>
                 <Routes>
+                  <Route path={routes.topicLanding} element={<TopicLandingPage />} />
                   <Route element={<AuthLayout />}>
-                    <Route path={routes.topicLanding} element={<TopicLandingPage />} />
                     <Route path={routes.login} element={<Login />} />
                     <Route path={routes.signup} element={<Signup />} />
                     <Route path={routes.passwordResetRequest} element={<PasswordResetRequest />} />
@@ -117,10 +117,10 @@ const AuthLayout = () => {
 };
 
 const Layout = () => {
-  const params = useParams();
-  if (params.baseUrl === "sub" && params.topic) {
+  if (window.location.pathname.startsWith("/sub/")) {
     return <TopicLandingPage />;
   }
+  const params = useParams();
   const { account, setAccount } = useContext(AccountContext);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [sendDialogOpenMode, setSendDialogOpenMode] = useState("");
