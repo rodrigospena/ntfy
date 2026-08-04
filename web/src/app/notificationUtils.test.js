@@ -39,6 +39,8 @@ describe("isImage", () => {
   it("falls back to the file extension when there is no type", () => {
     expect(isImage({ name: "photo.JPEG" })).toBeTruthy();
     expect(isImage({ url: "https://ntfy.sh/file/x.webp" })).toBeTruthy();
+    expect(isImage({ url: "https://example.com/image.png?width=500" })).toBeTruthy();
+    expect(isImage({ url: "https://static.wixstatic.com/media/a81cb6_899ef9ec94c14d9b925b42dfd8d47b59~mv2.jpg/v1/fill/w_500" })).toBeTruthy();
     expect(isImage({ name: "notes.txt" })).toBeFalsy();
   });
 

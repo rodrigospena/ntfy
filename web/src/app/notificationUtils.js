@@ -35,7 +35,7 @@ export const formatMessage = (m) => {
   return m.message || "";
 };
 
-export const imageRegex = /\.(png|jpe?g|gif|webp)$/i;
+export const imageRegex = /\.(png|jpe?g|gif|webp|svg)(\b|\?|#|\/)/i;
 export const isImage = (attachment) => {
   if (!attachment) return false;
 

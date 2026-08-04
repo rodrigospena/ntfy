@@ -822,7 +822,11 @@
         };
         if (title) payload.title = title;
         if (priority) payload.priority = parseInt(priority, 10);
-        if (icon) payload.icon = icon;
+        if (icon) {
+          payload.icon = icon;
+        } else if (attach) {
+          payload.icon = attach;
+        }
         if (attach) payload.attach = attach;
         if (email) payload.email = email;
         if (tags) payload.tags = tags.split(",").map(t => t.trim()).filter(Boolean);
