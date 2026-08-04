@@ -36,16 +36,22 @@ export const formatMessage = (m) => {
 };
 
 export const imageRegex = /\.(png|jpe?g|gif|webp|svg)(\b|\?|#|\/)/i;
+
+export const getAttachmentUrl = (attachment) => {
+  if (!attachment) return undefined;
+  if (typeof attachment === "string") return attachment;
+  return attachment.url;
+};
+
 export const isImage = (attachment) => {
   if (!attachment) return false;
-
-  // if there's a type, only take that into account
+  if (typeof attachment === "string") {
+    return !!attachment.match(imageRegex);
+  }
   if (attachment.type) {
     return attachment.type.startsWith("image/");
   }
-
-  // otherwise, check the extension
-  return attachment.name?.match(imageRegex) || attachment.url?.match(imageRegex);
+  return !!(attachment.name?.match(imageRegex) || attachment.url?.match(imageRegex));
 };
 
 export const icon = "/static/images/ntfy.png";
@@ -58,12 +64,14 @@ export const badge = "/static/images/ntfy-mask.svg";
 export const notificationTag = (baseUrl, topic, sequenceId) => `${baseUrl}/${topic}/${sequenceId}`;
 
 export const toNotificationParams = ({ message, defaultTitle, topicRoute, baseUrl, topic }) => {
-  const image = isImage(message.attachment) ? message.attachment.url : undefined;
+  const attachment = message.attachment || message.attach;
+  const attachmentUrl = getAttachmentUrl(attachment);
+  const image = isImage(attachment) ? attachmentUrl : undefined;
   const sequenceId = message.sequence_id || message.id;
   const tag = notificationTag(baseUrl, topic, sequenceId);
   const subscriptionId = `${baseUrl}/${topic}`;
 
-  const iconUrl = message.icon || (isImage(message.attachment) ? message.attachment.url : icon);
+  const iconUrl = message.icon || (isImage(attachment) ? attachmentUrl : icon);
 
   // https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API
   return [

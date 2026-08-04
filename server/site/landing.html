@@ -472,10 +472,16 @@
 
       const title = msg.title || formattedName;
       const clickUrl = msg.click || undefined;
-      let imageUrl = msg.icon || msg.attach || '/static/images/pwa-192x192.png';
+      const attachedUrl = (msg.attachment && typeof msg.attachment === 'object')
+        ? msg.attachment.url
+        : (msg.attachment || msg.attach || undefined);
 
-      if (window.location.protocol === 'https:' && imageUrl.startsWith('http://')) {
-        imageUrl = imageUrl.replace('http://', 'https://');
+      let iconUrl = msg.icon || attachedUrl || '/static/images/pwa-192x192.png';
+      let bannerUrl = attachedUrl || undefined;
+
+      if (window.location.protocol === 'https:') {
+        if (iconUrl && iconUrl.startsWith('http://')) iconUrl = iconUrl.replace('http://', 'https://');
+        if (bannerUrl && bannerUrl.startsWith('http://')) bannerUrl = bannerUrl.replace('http://', 'https://');
       }
 
       let hasFired = false;
@@ -485,11 +491,13 @@
 
         const options = {
           body: msg.message,
-          icon: imageUrl,
-          image: imageUrl,
+          icon: iconUrl,
           tag: msg.id || String(Date.now()),
           data: { url: clickUrl, message: msg }
         };
+        if (bannerUrl) {
+          options.image = bannerUrl;
+        }
 
         if ("Notification" in window && Notification.permission === "granted") {
           if ('serviceWorker' in navigator) {
@@ -509,11 +517,12 @@
         }
       };
 
-      if (imageUrl && (imageUrl.startsWith("http://") || imageUrl.startsWith("https://"))) {
+      const preloadUrl = bannerUrl || (iconUrl !== '/static/images/pwa-192x192.png' ? iconUrl : null);
+      if (preloadUrl && (preloadUrl.startsWith("http://") || preloadUrl.startsWith("https://"))) {
         const img = new Image();
         img.onload = showNotif;
         img.onerror = showNotif;
-        img.src = imageUrl;
+        img.src = preloadUrl;
         setTimeout(showNotif, 800);
       } else {
         showNotif();
