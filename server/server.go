@@ -2040,9 +2040,17 @@ func (s *Server) sendDelayedMessage(v *visitor, m *model.Message) error {
 // before passing it on to the next handler. This is meant to be used in combination with handlePublish.
 func (s *Server) transformBodyJSON(next handleFunc) handleFunc {
 	return func(w http.ResponseWriter, r *http.Request, v *visitor) error {
+		contentType := r.Header.Get("Content-Type")
+		isJSON := strings.HasPrefix(contentType, "application/json")
+		if !isJSON && r.URL.Path != "/" {
+			return next(w, r, v)
+		}
 		m, err := readJSONWithLimit[publishMessage](r.Body, s.config.MessageSizeLimit*2, false) // 2x to account for JSON format overhead
 		if err != nil {
 			return err
+		}
+		if !topicRegex.MatchString(m.Topic) && r.URL.Path != "/" {
+			m.Topic = strings.TrimPrefix(r.URL.Path, "/")
 		}
 		if !topicRegex.MatchString(m.Topic) {
 			return errHTTPBadRequestTopicInvalid

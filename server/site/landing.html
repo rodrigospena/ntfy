@@ -449,14 +449,14 @@
       const title = msg.title || formattedName;
       const options = {
         body: msg.message,
-        icon: msg.icon || '/static/images/pwa-192x192.png',
+        icon: msg.icon || msg.attach || '/static/images/pwa-192x192.png',
         tag: msg.id || String(Date.now()),
         data: { url: msg.click || window.location.href }
       };
 
       if ("Notification" in window && Notification.permission === "granted") {
         try {
-          if ('serviceWorker' in navigator) {
+          if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
             navigator.serviceWorker.ready.then(reg => {
               reg.showNotification(title, options);
             }).catch(() => {
@@ -466,7 +466,7 @@
             new Notification(title, options);
           }
         } catch (e) {
-          console.log("System notification error:", e);
+          try { new Notification(title, options); } catch (err) {}
         }
       }
     }
