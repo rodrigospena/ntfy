@@ -287,10 +287,11 @@ const handlePush = async (data) => {
 const handleClick = async (event) => {
   const t = await initI18n();
 
-  const clients = await self.clients.matchAll({ type: "window" });
-  const rootUrl = new URL(self.location.origin);
-  const rootClient = clients.find((client) => client.url === rootUrl.toString());
-  const fallbackClient = clients[0];
+  if (event.notification.data?.url && !event.action) {
+    self.clients.openWindow(event.notification.data.url);
+    event.notification.close();
+    return;
+  }
 
   if (!event.notification.data?.message) {
     // e.g. something other than a message, e.g. a subscription_expiring event

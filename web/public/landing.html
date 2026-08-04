@@ -442,32 +442,65 @@
       messageList.prepend(item);
     }
 
+    function createDirectNotification(title, options, clickUrl) {
+      try {
+        const n = new Notification(title, options);
+        n.onclick = (e) => {
+          e.preventDefault();
+          if (clickUrl) {
+            window.open(clickUrl, '_blank');
+          }
+        };
+      } catch (err) {}
+    }
+
     function triggerSystemNotification(rawMsg) {
       const msg = parseMsgData(rawMsg);
       if (!msg.message && !msg.title) return;
       playNotificationSound();
+
       const title = msg.title || formattedName;
-      const options = {
-        body: msg.message,
-        icon: msg.icon || msg.attach || '/static/images/pwa-192x192.png',
-        tag: msg.id || String(Date.now()),
-        data: { url: msg.click || window.location.href }
+      const clickUrl = msg.click || undefined;
+      const imageUrl = msg.icon || msg.attach || '/static/images/pwa-192x192.png';
+
+      let hasFired = false;
+      const showNotif = () => {
+        if (hasFired) return;
+        hasFired = true;
+
+        const options = {
+          body: msg.message,
+          icon: imageUrl,
+          image: imageUrl,
+          tag: msg.id || String(Date.now()),
+          data: { url: clickUrl, message: msg }
+        };
+
+        if ("Notification" in window && Notification.permission === "granted") {
+          try {
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+              navigator.serviceWorker.ready.then(reg => {
+                reg.showNotification(title, options);
+              }).catch(() => {
+                createDirectNotification(title, options, clickUrl);
+              });
+            } else {
+              createDirectNotification(title, options, clickUrl);
+            }
+          } catch (e) {
+            createDirectNotification(title, options, clickUrl);
+          }
+        }
       };
 
-      if ("Notification" in window && Notification.permission === "granted") {
-        try {
-          if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-            navigator.serviceWorker.ready.then(reg => {
-              reg.showNotification(title, options);
-            }).catch(() => {
-              new Notification(title, options);
-            });
-          } else {
-            new Notification(title, options);
-          }
-        } catch (e) {
-          try { new Notification(title, options); } catch (err) {}
-        }
+      if (imageUrl && (imageUrl.startsWith("http://") || imageUrl.startsWith("https://"))) {
+        const img = new Image();
+        img.onload = showNotif;
+        img.onerror = showNotif;
+        img.src = imageUrl;
+        setTimeout(showNotif, 1200);
+      } else {
+        showNotif();
       }
     }
 

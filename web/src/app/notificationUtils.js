@@ -82,6 +82,7 @@ export const toNotificationParams = ({ message, defaultTitle, topicRoute, baseUr
         subscriptionId,
         message,
         topicRoute,
+        url: message.click,
       },
       actions: message.actions
         ?.filter(({ action }) => action === ACTION_VIEW || action === ACTION_HTTP)
