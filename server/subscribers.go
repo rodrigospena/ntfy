@@ -223,6 +223,44 @@ func (s *SubscriberStore) DeleteTopic(name string) error {
 	return err
 }
 
+func (s *SubscriberStore) UpdateSubscriber(id int64, nickname, device, topic string) (*Subscriber, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	_, err := s.db.Exec(
+		"UPDATE subscribers SET nickname = ?, device = ?, topic = ? WHERE id = ?",
+		nickname, device, topic, id,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	var sub Subscriber
+	err = s.db.QueryRow("SELECT id, topic, COALESCE(nickname, ''), ip, COALESCE(device, ''), created_at FROM subscribers WHERE id = ?", id).Scan(
+		&sub.ID, &sub.Topic, &sub.Nickname, &sub.IP, &sub.Device, &sub.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &sub, nil
+}
+
+func (s *SubscriberStore) DeleteSubscriber(id int64) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	_, err := s.db.Exec("DELETE FROM subscribers WHERE id = ?", id)
+	return err
+}
+
+func (s *SubscriberStore) DeleteSubscribersByTopic(topic string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	_, err := s.db.Exec("DELETE FROM subscribers WHERE topic = ?", topic)
+	return err
+}
+
 func (s *SubscriberStore) Close() error {
 	if s.db != nil {
 		return s.db.Close()

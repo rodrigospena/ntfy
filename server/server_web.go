@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 
+	"heckel.io/ntfy/v2/model"
 	"heckel.io/ntfy/v2/util"
 )
 
@@ -120,6 +122,80 @@ func (s *Server) handleTopicUpdate(w http.ResponseWriter, r *http.Request, _ *vi
 		return err
 	}
 	return s.writeJSON(w, item)
+}
+
+type subscriberUpdateRequest struct {
+	ID       int64  `json:"id"`
+	Nickname string `json:"nickname"`
+	Device   string `json:"device"`
+	Topic    string `json:"topic"`
+}
+
+func (s *Server) handleSubscriberUpdate(w http.ResponseWriter, r *http.Request, _ *visitor) error {
+	var req subscriberUpdateRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return errHTTPBadRequest
+	}
+	if req.ID == 0 || req.Topic == "" {
+		return errHTTPBadRequest
+	}
+
+	sub, err := s.subscriberStore.UpdateSubscriber(req.ID, req.Nickname, req.Device, req.Topic)
+	if err != nil {
+		return err
+	}
+	return s.writeJSON(w, sub)
+}
+
+func (s *Server) handleSubscriberDelete(w http.ResponseWriter, r *http.Request, _ *visitor) error {
+	idStr := r.URL.Query().Get("id")
+	topic := r.URL.Query().Get("topic")
+
+	if idStr != "" {
+		id, err := strconv.ParseInt(idStr, 10, 64)
+		if err != nil {
+			return errHTTPBadRequest
+		}
+		if err := s.subscriberStore.DeleteSubscriber(id); err != nil {
+			return err
+		}
+		return s.writeJSON(w, map[string]any{"success": true})
+	}
+
+	if topic != "" {
+		if err := s.subscriberStore.DeleteSubscribersByTopic(topic); err != nil {
+			return err
+		}
+		return s.writeJSON(w, map[string]any{"success": true})
+	}
+
+	return errHTTPBadRequest
+}
+
+func (s *Server) handleTopicDelete(w http.ResponseWriter, r *http.Request, _ *visitor) error {
+	name := r.URL.Query().Get("name")
+	if name == "" {
+		return errHTTPBadRequest
+	}
+	if err := s.subscriberStore.DeleteTopic(name); err != nil {
+		return err
+	}
+	return s.writeJSON(w, map[string]any{"success": true})
+}
+
+func (s *Server) handleTopicHistory(w http.ResponseWriter, r *http.Request, _ *visitor) error {
+	topic := r.URL.Query().Get("topic")
+	if topic == "" {
+		return errHTTPBadRequest
+	}
+	messages, err := s.messageCache.Messages(topic, model.SinceAllMessages, false)
+	if err != nil {
+		return err
+	}
+	return s.writeJSON(w, map[string]any{
+		"topic":    topic,
+		"messages": messages,
+	})
 }
 
 func (s *Server) handleConfig(w http.ResponseWriter, _ *http.Request, _ *visitor) error {

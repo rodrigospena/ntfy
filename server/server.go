@@ -598,12 +598,20 @@ func (s *Server) handleInternal(w http.ResponseWriter, r *http.Request, v *visit
 		return s.handleLandingSubscribe(w, r, v)
 	} else if r.Method == http.MethodGet && r.URL.Path == "/v1/subscribers" {
 		return s.handleSubscribersList(w, r, v)
+	} else if r.Method == http.MethodPut && r.URL.Path == "/v1/admin/subscribers" {
+		return s.handleSubscriberUpdate(w, r, v)
+	} else if r.Method == http.MethodDelete && r.URL.Path == "/v1/admin/subscribers" {
+		return s.handleSubscriberDelete(w, r, v)
 	} else if r.Method == http.MethodGet && r.URL.Path == "/v1/admin/topics" {
 		return s.handleTopicsList(w, r, v)
 	} else if r.Method == http.MethodPost && r.URL.Path == "/v1/admin/topics" {
 		return s.handleTopicAdd(w, r, v)
 	} else if r.Method == http.MethodPut && r.URL.Path == "/v1/admin/topics" {
 		return s.handleTopicUpdate(w, r, v)
+	} else if r.Method == http.MethodDelete && r.URL.Path == "/v1/admin/topics" {
+		return s.handleTopicDelete(w, r, v)
+	} else if r.Method == http.MethodGet && r.URL.Path == "/v1/admin/topics/history" {
+		return s.handleTopicHistory(w, r, v)
 	} else if r.Method == http.MethodGet && (r.URL.Path == "/admin" || webAppAdminRegex.MatchString(r.URL.Path)) {
 		return s.ensureWebEnabled(s.handleAdminPage)(w, r, v)
 	} else if r.Method == http.MethodGet && r.URL.Path == webAppConfigPath {

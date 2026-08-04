@@ -172,6 +172,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
 
     .metrics-grid {
@@ -310,6 +312,68 @@
       transform: translateY(-1px);
     }
 
+    .btn-danger {
+      padding: 0.6rem 1.2rem;
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      border-radius: 12px;
+      color: #f87171;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.35);
+      color: #ffffff;
+    }
+
+    .btn-primary-sm {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent-color) 0%, #8b5cf6 100%);
+      color: #ffffff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-secondary-sm {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-secondary-sm:hover {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .btn-danger-sm {
+      padding: 0.35rem 0.75rem;
+      font-size: 0.8rem;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .btn-danger-sm:hover {
+      background: rgba(239, 68, 68, 0.3);
+      color: #ffffff;
+    }
+
     .table-container {
       overflow-x: auto;
     }
@@ -395,6 +459,36 @@
       border-radius: 24px;
       padding: 2rem;
       box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-card.large {
+      max-width: 920px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .subpage-nav {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 0.75rem;
+    }
+
+    .subpage-nav button {
+      padding: 0.6rem 1rem;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .subpage-nav button.active {
+      background: rgba(99, 102, 241, 0.25);
+      color: #ffffff;
+      border: 1px solid rgba(99, 102, 241, 0.4);
     }
   </style>
 </head>
@@ -523,7 +617,13 @@
     <div id="tab-subscribers" class="tab-content">
       <div class="page-title">
         <span>Inscritos & Dispositivos Cadastrados</span>
-        <button class="btn-secondary" onclick="loadData()">Atualizar Lista</button>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          <select id="clearTopicSelect" class="select-field" style="width:auto; padding:0.4rem 0.8rem; font-size:0.85rem;">
+            <option value="">Todos os canais</option>
+          </select>
+          <button class="btn-danger" onclick="clearSubscribersByTopicPrompt()">Limpar Inscritos</button>
+          <button class="btn-secondary" onclick="loadData()">Atualizar Lista</button>
+        </div>
       </div>
 
       <div class="card">
@@ -535,7 +635,7 @@
                 <th>Canal (Tópico)</th>
                 <th>Endereço IP</th>
                 <th>Data de Inscrição</th>
-                <th>Ação</th>
+                <th>Ações</th>
               </tr>
             </thead>
             <tbody id="subscribersTable">
@@ -620,10 +720,10 @@
 
   </div>
 
-  <!-- Create Topic Modal -->
+  <!-- Create / Edit Topic Modal -->
   <div id="topicModal" class="modal-overlay">
     <div class="modal-card">
-      <div class="card-title" style="margin-bottom: 1.5rem;">Criar Novo Canal / Tópico</div>
+      <div class="card-title" id="topicModalTitle" style="margin-bottom: 1.5rem;">Criar Novo Canal / Tópico</div>
       <form id="topicForm">
         <div class="form-group">
           <label class="form-label" for="topicName">ID do Canal (Sem espaços):</label>
@@ -637,6 +737,10 @@
           <label class="form-label" for="topicIcon">Ícone / Logo Padrão (URL):</label>
           <input type="url" id="topicIcon" class="input-field" placeholder="Ex: https://site.com/logo.png">
         </div>
+        <div class="form-group">
+          <label class="form-label" for="topicImage">Imagem Padrão por URL (Opcional):</label>
+          <input type="url" id="topicImage" class="input-field" placeholder="Ex: https://site.com/banner.jpg">
+        </div>
         <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
           <button type="button" class="btn-secondary" onclick="closeTopicModal()">Cancelar</button>
           <button type="submit" class="btn-primary">Salvar Canal</button>
@@ -645,9 +749,116 @@
     </div>
   </div>
 
+  <!-- Edit Subscriber Modal -->
+  <div id="subscriberModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="card-title" style="margin-bottom: 1.5rem;">Editar Inscrito</div>
+      <form id="subscriberForm">
+        <div class="form-group">
+          <label class="form-label" for="editSubNickname">Apelido do Visitante:</label>
+          <input type="text" id="editSubNickname" class="input-field" placeholder="Ex: João Silva" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="editSubDevice">Nome do Dispositivo:</label>
+          <input type="text" id="editSubDevice" class="input-field" placeholder="Ex: Samsung Galaxy S23">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="editSubTopic">Canal (Tópico):</label>
+          <select id="editSubTopic" class="select-field" required>
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+        <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
+          <button type="button" class="btn-secondary" onclick="closeSubscriberModal()">Cancelar</button>
+          <button type="submit" class="btn-primary">Salvar Alterações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Topic Subpage Modal -->
+  <div id="topicSubpageModal" class="modal-overlay">
+    <div class="modal-card large">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 1rem;">
+        <div>
+          <h2 id="subpageTopicName" style="font-size: 1.6rem; font-weight:700;">—</h2>
+          <div id="subpageTopicId" style="color: var(--accent-color); font-weight:600; font-size:0.95rem;">@—</div>
+        </div>
+        <button class="btn-secondary-sm" onclick="closeTopicSubpage()">✕ Fechar</button>
+      </div>
+
+      <div style="display:flex; gap:0.5rem; margin-bottom:1.25rem; flex-wrap:wrap;">
+        <button class="btn-primary-sm" onclick="dispatchFromSubpage()">Disparar Notificação</button>
+        <button class="btn-secondary-sm" onclick="copySubpageLandingUrl()">Copiar Link de Inscrição</button>
+        <button class="btn-secondary-sm" onclick="editTopicFromSubpage()">Editar Canal</button>
+        <button class="btn-danger-sm" onclick="clearSubpageSubscribersPrompt()">Limpar Inscritos</button>
+        <button class="btn-danger-sm" onclick="deleteTopicFromSubpage()">Excluir Canal</button>
+      </div>
+
+      <div class="metrics-grid" style="margin-bottom:1.25rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+        <div class="metric-card" style="padding:1rem;">
+          <div class="metric-title">Inscritos do Canal</div>
+          <div class="metric-value" id="subpageSubCount" style="font-size:1.5rem;">0</div>
+        </div>
+        <div class="metric-card" style="padding:1rem;">
+          <div class="metric-title">Histórico de Notificações</div>
+          <div class="metric-value" id="subpageMsgCount" style="font-size:1.5rem;">0</div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-bottom:1.25rem;">
+        <label class="form-label">Link Direto da Landing Page:</label>
+        <input type="text" id="subpageLandingUrl" class="input-field" readonly style="font-family:monospace; font-size:0.85rem;">
+      </div>
+
+      <div class="subpage-nav">
+        <button id="subpageBtnSubscribers" class="active" onclick="switchSubpageTab('subscribers', this)">Inscritos do Canal</button>
+        <button id="subpageBtnHistory" onclick="switchSubpageTab('history', this)">Histórico de Notificações</button>
+      </div>
+
+      <div id="subpage-tab-subscribers" class="subpage-tab-content">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Apelido / Dispositivo</th>
+                <th>Endereço IP</th>
+                <th>Data</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="subpageSubscribersTable">
+              <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Carregando inscritos...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="subpage-tab-history" class="subpage-tab-content" style="display:none;">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Mensagem</th>
+                <th>Prioridade</th>
+                <th>Data / Hora</th>
+              </tr>
+            </thead>
+            <tbody id="subpageHistoryTable">
+              <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Carregando histórico...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     let currentTopics = [];
     let currentSubscribers = [];
+    let currentEditingSubscriberId = null;
+    let activeSubpageTopic = null;
 
     function switchTab(tabId, btn) {
       document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
@@ -667,6 +878,7 @@
           const topData = await topRes.json();
           currentTopics = topData.topics || [];
           renderTopics();
+          populateTopicDropdowns();
         }
 
         if (subRes.ok) {
@@ -680,11 +892,22 @@
       }
     }
 
+    function populateTopicDropdowns() {
+      const dispatchSelect = document.getElementById("sendTopic");
+      const editSubTopicSelect = document.getElementById("editSubTopic");
+      const filterTopicSelect = document.getElementById("clearTopicSelect");
+
+      const optionsHtml = currentTopics.map(t => `<option value="${escapeHtml(t.name)}">${escapeHtml(t.display_name || t.name)} (${t.name})</option>`).join("");
+
+      if (dispatchSelect) dispatchSelect.innerHTML = optionsHtml;
+      if (editSubTopicSelect) editSubTopicSelect.innerHTML = optionsHtml;
+      if (filterTopicSelect) {
+        filterTopicSelect.innerHTML = '<option value="">Todos os canais</option>' + optionsHtml;
+      }
+    }
+
     function renderTopics() {
       const tbody = document.getElementById("topicsTable");
-      const select = document.getElementById("sendTopic");
-
-      select.innerHTML = currentTopics.map(t => `<option value="${escapeHtml(t.name)}">${escapeHtml(t.display_name || t.name)} (${t.name})</option>`).join("");
 
       if (currentTopics.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Nenhum canal criado ainda.</td></tr>';
@@ -697,12 +920,23 @@
           <tr>
             <td><strong>${escapeHtml(t.name)}</strong></td>
             <td>${escapeHtml(t.display_name || t.name)}</td>
-            <td>${t.default_icon ? `<img src="${escapeHtml(t.default_icon)}" width="24" height="24" style="border-radius:4px;">` : '—'}</td>
+            <td>${t.default_icon ? `<img src="${escapeHtml(t.default_icon)}" width="24" height="24" style="border-radius:4px; vertical-align:middle;">` : '—'}</td>
             <td><code style="font-size:0.8rem;">${landingUrl}</code></td>
             <td>
-              <button class="btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="navigator.clipboard.writeText('${landingUrl}'); alert('Link copiado!');">
-                Copiar Link
-              </button>
+              <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                <button class="btn-primary-sm" onclick="openTopicSubpage('${escapeHtml(t.name)}')">
+                  Subpágina
+                </button>
+                <button class="btn-secondary-sm" onclick="editTopic('${escapeHtml(t.name)}')">
+                  Editar
+                </button>
+                <button class="btn-secondary-sm" onclick="navigator.clipboard.writeText('${landingUrl}'); alert('Link copiado!');">
+                  Copiar Link
+                </button>
+                <button class="btn-danger-sm" onclick="deleteTopic('${escapeHtml(t.name)}')">
+                  Excluir
+                </button>
+              </div>
             </td>
           </tr>
         `;
@@ -730,9 +964,17 @@
           <td><code>${escapeHtml(sub.ip)}</code></td>
           <td>${new Date(sub.created_at).toLocaleString("pt-BR")}</td>
           <td>
-            <button class="btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="selectTopicForDispatch('${escapeHtml(sub.topic)}')">
-              Disparar
-            </button>
+            <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+              <button class="btn-secondary-sm" onclick="editSubscriber(${sub.id})">
+                Editar
+              </button>
+              <button class="btn-secondary-sm" onclick="selectTopicForDispatch('${escapeHtml(sub.topic)}')">
+                Disparar
+              </button>
+              <button class="btn-danger-sm" onclick="deleteSubscriber(${sub.id})">
+                Excluir
+              </button>
+            </div>
           </td>
         </tr>
       `).join("");
@@ -766,25 +1008,71 @@
       return (text || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
-    function openTopicModal() {
+    function openTopicModal(editName = null) {
+      const modalTitle = document.getElementById("topicModalTitle");
+      const nameInput = document.getElementById("topicName");
+      const displayNameInput = document.getElementById("topicDisplayName");
+      const iconInput = document.getElementById("topicIcon");
+      const imageInput = document.getElementById("topicImage");
+
+      if (editName) {
+        const t = currentTopics.find(x => x.name === editName);
+        modalTitle.textContent = "Editar Canal / Tópico";
+        nameInput.value = t ? t.name : editName;
+        nameInput.disabled = true;
+        displayNameInput.value = t ? t.display_name : "";
+        iconInput.value = t ? t.default_icon : "";
+        imageInput.value = t ? (t.default_image || "") : "";
+        document.getElementById("topicForm").dataset.mode = "edit";
+      } else {
+        modalTitle.textContent = "Criar Novo Canal / Tópico";
+        nameInput.value = "";
+        nameInput.disabled = false;
+        displayNameInput.value = "";
+        iconInput.value = "";
+        imageInput.value = "";
+        document.getElementById("topicForm").dataset.mode = "create";
+      }
       document.getElementById("topicModal").classList.add("active");
+    }
+
+    function editTopic(name) {
+      openTopicModal(name);
     }
 
     function closeTopicModal() {
       document.getElementById("topicModal").classList.remove("active");
     }
 
+    async function deleteTopic(name) {
+      if (!confirm(`Tem certeza que deseja excluir o canal "${name}"?`)) return;
+      try {
+        const res = await fetch(`/v1/admin/topics?name=${encodeURIComponent(name)}`, { method: "DELETE" });
+        if (res.ok) {
+          loadData();
+          closeTopicSubpage();
+        } else {
+          alert("Erro ao excluir tópico.");
+        }
+      } catch (err) {
+        alert("Erro de conexão.");
+      }
+    }
+
     document.getElementById("topicForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+      const mode = document.getElementById("topicForm").dataset.mode || "create";
       const name = document.getElementById("topicName").value.trim();
       const displayName = document.getElementById("topicDisplayName").value.trim();
       const defaultIcon = document.getElementById("topicIcon").value.trim();
+      const defaultImage = document.getElementById("topicImage").value.trim();
 
+      const method = mode === "edit" ? "PUT" : "POST";
       try {
         const res = await fetch("/v1/admin/topics", {
-          method: "POST",
+          method: method,
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, display_name: displayName, default_icon: defaultIcon })
+          body: JSON.stringify({ name, display_name: displayName, default_icon: defaultIcon, default_image: defaultImage })
         });
         if (res.ok) {
           closeTopicModal();
@@ -798,6 +1086,200 @@
       }
     });
 
+    // SUBSCRIBERS EDIT & DELETE
+    function editSubscriber(id) {
+      const sub = currentSubscribers.find(s => s.id === id);
+      if (!sub) return;
+      currentEditingSubscriberId = id;
+      document.getElementById("editSubNickname").value = sub.nickname || "";
+      document.getElementById("editSubDevice").value = sub.device || "";
+      document.getElementById("editSubTopic").value = sub.topic || "";
+      document.getElementById("subscriberModal").classList.add("active");
+    }
+
+    function closeSubscriberModal() {
+      document.getElementById("subscriberModal").classList.remove("active");
+    }
+
+    document.getElementById("subscriberForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!currentEditingSubscriberId) return;
+
+      const nickname = document.getElementById("editSubNickname").value.trim();
+      const device = document.getElementById("editSubDevice").value.trim();
+      const topic = document.getElementById("editSubTopic").value;
+
+      try {
+        const res = await fetch("/v1/admin/subscribers", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: currentEditingSubscriberId, nickname, device, topic })
+        });
+        if (res.ok) {
+          closeSubscriberModal();
+          loadData();
+          if (activeSubpageTopic) renderSubpageSubscribers(activeSubpageTopic);
+        } else {
+          alert("Erro ao atualizar inscrito.");
+        }
+      } catch (err) {
+        alert("Erro de conexão.");
+      }
+    });
+
+    async function deleteSubscriber(id) {
+      if (!confirm("Deseja excluir este inscrito?")) return;
+      try {
+        const res = await fetch(`/v1/admin/subscribers?id=${id}`, { method: "DELETE" });
+        if (res.ok) {
+          loadData();
+          if (activeSubpageTopic) renderSubpageSubscribers(activeSubpageTopic);
+        } else {
+          alert("Erro ao excluir inscrito.");
+        }
+      } catch (err) {
+        alert("Erro de conexão.");
+      }
+    }
+
+    async function clearSubscribersByTopicPrompt() {
+      const topic = document.getElementById("clearTopicSelect").value;
+      const label = topic ? `do canal "${topic}"` : "DE TODOS OS CANAIS";
+      if (!confirm(`Tem certeza que deseja limpar a lista de inscritos ${label}?`)) return;
+
+      const url = topic ? `/v1/admin/subscribers?topic=${encodeURIComponent(topic)}` : `/v1/admin/subscribers?topic=all`;
+      try {
+        const res = await fetch(url, { method: "DELETE" });
+        if (res.ok) {
+          loadData();
+          if (activeSubpageTopic) renderSubpageSubscribers(activeSubpageTopic);
+          alert("Inscritos removidos com sucesso.");
+        } else {
+          alert("Erro ao limpar inscritos.");
+        }
+      } catch (err) {
+        alert("Erro de conexão.");
+      }
+    }
+
+    // TOPIC SUBPAGE FEATURE
+    async function openTopicSubpage(topicName) {
+      activeSubpageTopic = topicName;
+      const t = currentTopics.find(x => x.name === topicName) || { name: topicName, display_name: topicName };
+      document.getElementById("subpageTopicName").textContent = t.display_name || t.name;
+      document.getElementById("subpageTopicId").textContent = `@${t.name}`;
+
+      const landingUrl = `${window.location.origin}/landing/${t.name}`;
+      document.getElementById("subpageLandingUrl").value = landingUrl;
+
+      switchSubpageTab('subscribers', document.getElementById("subpageBtnSubscribers"));
+      renderSubpageSubscribers(topicName);
+      loadSubpageHistory(topicName);
+
+      document.getElementById("topicSubpageModal").classList.add("active");
+    }
+
+    function closeTopicSubpage() {
+      document.getElementById("topicSubpageModal").classList.remove("active");
+      activeSubpageTopic = null;
+    }
+
+    function switchSubpageTab(subTab, btn) {
+      document.querySelectorAll(".subpage-tab-content").forEach(el => el.style.display = "none");
+      document.querySelectorAll(".subpage-nav button").forEach(el => el.classList.remove("active"));
+      document.getElementById("subpage-tab-" + subTab).style.display = "block";
+      if (btn) btn.classList.add("active");
+    }
+
+    function renderSubpageSubscribers(topicName) {
+      const tbody = document.getElementById("subpageSubscribersTable");
+      const subs = currentSubscribers.filter(s => s.topic === topicName);
+      document.getElementById("subpageSubCount").textContent = subs.length;
+
+      if (subs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Nenhum inscrito neste canal.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = subs.map(sub => `
+        <tr>
+          <td>
+            <strong>${escapeHtml(sub.nickname || 'Visitante')}</strong><br>
+            <small style="color: var(--text-muted);">${escapeHtml(sub.device || '')}</small>
+          </td>
+          <td><code>${escapeHtml(sub.ip)}</code></td>
+          <td>${new Date(sub.created_at).toLocaleString("pt-BR")}</td>
+          <td>
+            <div style="display:flex; gap:0.4rem;">
+              <button class="btn-secondary-sm" onclick="editSubscriber(${sub.id})">Editar</button>
+              <button class="btn-danger-sm" onclick="deleteSubscriber(${sub.id})">Excluir</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    async function loadSubpageHistory(topicName) {
+      const tbody = document.getElementById("subpageHistoryTable");
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Carregando histórico...</td></tr>';
+      try {
+        const res = await fetch(`/v1/admin/topics/history?topic=${encodeURIComponent(topicName)}`);
+        if (res.ok) {
+          const data = await res.json();
+          const msgs = data.messages || [];
+          document.getElementById("subpageMsgCount").textContent = msgs.length;
+
+          if (msgs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Nenhuma notificação registrada no histórico ainda.</td></tr>';
+            return;
+          }
+
+          tbody.innerHTML = msgs.map(m => `
+            <tr>
+              <td><strong>${escapeHtml(m.title || 'Sem título')}</strong></td>
+              <td>${escapeHtml(m.message || '')}</td>
+              <td><span class="tag-badge">Pior. ${m.priority || 3}</span></td>
+              <td>${new Date(m.time * 1000).toLocaleString("pt-BR")}</td>
+            </tr>
+          `).join("");
+        } else {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Histórico indisponível.</td></tr>';
+        }
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Erro ao carregar histórico.</td></tr>';
+      }
+    }
+
+    function dispatchFromSubpage() {
+      if (!activeSubpageTopic) return;
+      const topic = activeSubpageTopic;
+      closeTopicSubpage();
+      selectTopicForDispatch(topic);
+    }
+
+    function copySubpageLandingUrl() {
+      const url = document.getElementById("subpageLandingUrl").value;
+      navigator.clipboard.writeText(url);
+      alert("Link de inscrição copiado!");
+    }
+
+    function editTopicFromSubpage() {
+      if (!activeSubpageTopic) return;
+      editTopic(activeSubpageTopic);
+    }
+
+    function deleteTopicFromSubpage() {
+      if (!activeSubpageTopic) return;
+      deleteTopic(activeSubpageTopic);
+    }
+
+    function clearSubpageSubscribersPrompt() {
+      if (!activeSubpageTopic) return;
+      document.getElementById("clearTopicSelect").value = activeSubpageTopic;
+      clearSubscribersByTopicPrompt();
+    }
+
+    // Dispatcher Form
     document.getElementById("dispatchForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const toast = document.getElementById("toastMessage");
