@@ -445,13 +445,24 @@
     function createDirectNotification(title, options, clickUrl) {
       try {
         const n = new Notification(title, options);
-        n.onclick = (e) => {
-          e.preventDefault();
-          if (clickUrl) {
+        if (clickUrl) {
+          n.onclick = (e) => {
+            e.preventDefault();
             window.open(clickUrl, '_blank');
+          };
+        }
+      } catch (err) {
+        try {
+          const fallbackOpts = { body: options.body, tag: options.tag };
+          const n = new Notification(title, fallbackOpts);
+          if (clickUrl) {
+            n.onclick = (e) => {
+              e.preventDefault();
+              window.open(clickUrl, '_blank');
+            };
           }
-        };
-      } catch (err) {}
+        } catch (e2) {}
+      }
     }
 
     function triggerSystemNotification(rawMsg) {
@@ -461,7 +472,11 @@
 
       const title = msg.title || formattedName;
       const clickUrl = msg.click || undefined;
-      const imageUrl = msg.icon || msg.attach || '/static/images/pwa-192x192.png';
+      let imageUrl = msg.icon || msg.attach || '/static/images/pwa-192x192.png';
+
+      if (window.location.protocol === 'https:' && imageUrl.startsWith('http://')) {
+        imageUrl = imageUrl.replace('http://', 'https://');
+      }
 
       let hasFired = false;
       const showNotif = () => {
@@ -477,17 +492,18 @@
         };
 
         if ("Notification" in window && Notification.permission === "granted") {
-          try {
-            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-              navigator.serviceWorker.ready.then(reg => {
-                reg.showNotification(title, options);
-              }).catch(() => {
-                createDirectNotification(title, options, clickUrl);
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.ready.then(reg => {
+              reg.showNotification(title, options).catch(() => {
+                const fallbackOpts = { body: msg.message, tag: options.tag, data: options.data };
+                reg.showNotification(title, fallbackOpts).catch(() => {
+                  createDirectNotification(title, options, clickUrl);
+                });
               });
-            } else {
+            }).catch(() => {
               createDirectNotification(title, options, clickUrl);
-            }
-          } catch (e) {
+            });
+          } else {
             createDirectNotification(title, options, clickUrl);
           }
         }
@@ -498,7 +514,7 @@
         img.onload = showNotif;
         img.onerror = showNotif;
         img.src = imageUrl;
-        setTimeout(showNotif, 1200);
+        setTimeout(showNotif, 800);
       } else {
         showNotif();
       }
